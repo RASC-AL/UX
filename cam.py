@@ -8,7 +8,7 @@ class camThread(QtCore.QThread):
     def __init__(self,windowId):
         QtCore.QThread.__init__(self)    
         self.windowId =windowId                                   
-        self.player = gst.parse_launch("udpsrc port=5000 !  application/x-rtp, encoding-name=H264, payload=96 !  rtph264depay ! h264parse ! ffdec_h264 ! autovideosink")                            
+        self.player = gst.parse_launch("udpsrc port=1234 !  application/x-rtp, encoding-name=H264, payload=96 !  rtph264depay ! h264parse ! ffdec_h264 ! autovideosink")                            
         
         bus = self.player.get_bus()
         bus.add_signal_watch()

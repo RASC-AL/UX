@@ -15,14 +15,63 @@ class Rover(QtGui.QMainWindow):
         super(Rover, self).__init__()
        
         self.editText = MyTextEdit(self)
-        self.setCentralWidget(self.editText)
-        
+        self.setCentralWidget(self.editText)        
         self.initUI()
         
     def initUI(self):   
            
         pic = QtGui.QWidget(self)
         pic.setGeometry(10, 10, 400, 240)
+        
+        #Start Edit Camera
+            #Labels for Camera
+
+        self.cameraLabel0=QtGui.QLabel('Camera 0',self)
+        self.cameraLabel1=QtGui.QLabel('Camera 1',self)
+        self.cameraLabel2=QtGui.QLabel('Camera 2',self)
+        self.cameraLabel3=QtGui.QLabel('Camera 3',self)
+        self.cameraLabel4=QtGui.QLabel('Camera 4',self)
+        self.cameraLabel0.setGeometry(450, 10, 100, 30)
+        self.cameraLabel1.setGeometry(450, 50, 100, 30)
+        self.cameraLabel2.setGeometry(450, 90, 100, 30)
+        self.cameraLabel3.setGeometry(450, 130, 100, 30)
+        self.cameraLabel4.setGeometry(450, 170, 100, 30)
+        #TextEdits for Camera defination
+
+        self.cameraText0 = QtGui.QLineEdit(self)
+        self.cameraText1 = QtGui.QLineEdit(self)
+        self.cameraText2 = QtGui.QLineEdit(self)
+        self.cameraText3 = QtGui.QLineEdit(self)
+        self.cameraText4 = QtGui.QLineEdit(self)
+        self.cameraText0.setGeometry(550, 10, 150, 30)
+        self.cameraText1.setGeometry(550, 50, 150, 30)
+        self.cameraText2.setGeometry(550, 90, 150, 30)
+        self.cameraText3.setGeometry(550, 130, 150, 30)
+        self.cameraText4.setGeometry(550, 170, 150, 30)
+        
+        #End Edit Camera
+        
+        setCameraButton = QtGui.QPushButton("Set Cam",self)
+        setCameraButton.clicked.connect(self.setCam)
+        setCameraButton.setGeometry(450,210,90,60)       
+        setCameraButton.setStyleSheet("background:white;color:black;")
+        
+        
+        comboCameraSelect = QtGui.QComboBox(self)
+        comboCameraSelect.setGeometry(450, 280, 150, 50)
+        comboCameraSelect.addItem("camera0")
+        comboCameraSelect.addItem("camera1")
+        comboCameraSelect.addItem("camera2")
+        comboCameraSelect.addItem("camera3")
+        comboCameraSelect.addItem("camera4")
+
+        comboCameraSelect.activated[str].connect(self.onComboSelected)
+        self.comboCameraSelect = comboCameraSelect
+        
+        
+        
+        
+        
         
         
         pic.setStyleSheet("image:url(/home/akash/Downloads/bulls.jpg);background-repeat:repat; ")
@@ -60,6 +109,12 @@ class Rover(QtGui.QMainWindow):
         self.setWindowTitle('Ub - Rasc-Al')
         self.show()
         self.cam =None
+    def onComboSelected(self):
+        pass
+    def setCam(self):
+        
+        #Set camera logic comes here    
+        pass
         
     def changeText(self):
         self.edit.setText("Some")
