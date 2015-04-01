@@ -24,7 +24,7 @@ class xbox(QtCore.QThread):
 			totalsent = totalsent + sent
 
 	def __init__(self):
-		QtCore.QThread.__init__(self)
+		  QtCore.QThread.__init__(self)
 		print "Am inside xbox init"
 		self.elbowPosition = 1.001
 		self.shoulderPosition = 1.001
