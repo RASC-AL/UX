@@ -12,11 +12,10 @@ from cam import camThread
 class Rover(QtGui.QMainWindow):
     
     def __init__(self):
-        super(Rover, self).__init__()
-       
+        super(Rover, self).__init__()       
         self.editText = MyTextEdit(self)
         self.setCentralWidget(self.editText)        
-        self.initUI()
+        self.initUI()                
         
     def initUI(self):   
            
@@ -68,12 +67,6 @@ class Rover(QtGui.QMainWindow):
         comboCameraSelect.activated[str].connect(self.onComboSelected)
         self.comboCameraSelect = comboCameraSelect
         
-        
-        
-        
-        
-        
-        
         pic.setStyleSheet("image:url(/home/akash/Downloads/bulls.jpg);background-repeat:repat; ")
         pic.setAttribute(0,1);
         pic.setAttribute(3,1);
@@ -109,10 +102,10 @@ class Rover(QtGui.QMainWindow):
         self.setWindowTitle('Ub - Rasc-Al')
         self.show()
         self.cam =None
+                            
     def onComboSelected(self):
         pass
     def setCam(self):
-        
         #Set camera logic comes here    
         pass
         
@@ -130,14 +123,22 @@ class Rover(QtGui.QMainWindow):
             self.cam.quit()
             self.cam = None
                 
-    def startCam(self):
-       
+    def startCam(self):       
         if(self.cam==None):                       
             self.cam = camThread(int(self.pic.winId()))                                 
             self.cam.start()
-            
+                        
         elif(self.cam.isRunning()):            
             pass
+        
+    def startXbox(self):
+        if(self.xbox==None):  
+            self.xbox = xbox()  
+        else:
+            self.xbox.stop()          
+        self.xbox.start() 
+    def stopXbox(self):
+        self.xbox.stop()
 
 class MyTextEdit(QtGui.QWidget):
     def __init__(self,parent):
