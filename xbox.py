@@ -8,9 +8,7 @@ import gobject
 gobject.threads_init()
 import gst
 
-
-class xbox(QtCore.QThread):
-	def send_data(self,msg):
+def send_data(msg):
 		msg = msg + "\n"
 		print msg
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -22,6 +20,9 @@ class xbox(QtCore.QThread):
 			if sent == 0:
 				raise RuntimeError("socket connection broken")
 			totalsent = totalsent + sent
+
+class xbox(QtCore.QThread):
+	
 
 	def __init__(self):
 		QtCore.QThread.__init__(self)
@@ -164,7 +165,7 @@ class xbox(QtCore.QThread):
 		    print self.Command
 		    self.Command = ""
 		    # Limit to 16 frames per second
-		    time.sleep(.125)
+		    time.sleep(125)
 		    #clock.tick(16)
 		    #self.clear()
 		    

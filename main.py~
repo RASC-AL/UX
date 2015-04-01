@@ -9,6 +9,7 @@ import server
 from PyQt4 import QtGui
 from cam import camThread
 from xbox import xbox
+from xbox import send_data
 
 class Rover(QtGui.QMainWindow):
     
@@ -116,7 +117,8 @@ class Rover(QtGui.QMainWindow):
         self.cam =None
                             
     def onComboSelected(self):
-        camstr = 'C ' + str(self.comboCameraSelect.currentIndex())  
+        camstr = 'C ' + str(self.comboCameraSelect.currentIndex()) 
+	send_data(camstr) 
         pass
     def setCam(self):
         #Set camera logic comes here    
