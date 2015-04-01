@@ -4,24 +4,23 @@ Created on Feb 6, 2015
 @author: akash
 '''
 import sys
+import socket
+import server
 from PyQt4 import QtGui
 from cam import camThread
-
-
 
 class Rover(QtGui.QMainWindow):
     
     def __init__(self):
         super(Rover, self).__init__()
-       
         self.editText = MyTextEdit(self)
-        self.setCentralWidget(self.editText)        
+        self.setCentralWidget(self.editText)
         self.initUI()
         
     def initUI(self):   
            
         pic = QtGui.QWidget(self)
-        pic.setGeometry(10, 10, 400, 240)
+        pic.setGeometry(10, 10, 400, 320)
         
         #Start Edit Camera
             #Labels for Camera
@@ -36,7 +35,7 @@ class Rover(QtGui.QMainWindow):
         self.cameraLabel2.setGeometry(450, 90, 100, 30)
         self.cameraLabel3.setGeometry(450, 130, 100, 30)
         self.cameraLabel4.setGeometry(450, 170, 100, 30)
-        #TextEdits for Camera defination
+        #TextEdits for Camera definition
 
         self.cameraText0 = QtGui.QLineEdit(self)
         self.cameraText1 = QtGui.QLineEdit(self)
@@ -48,7 +47,11 @@ class Rover(QtGui.QMainWindow):
         self.cameraText2.setGeometry(550, 90, 150, 30)
         self.cameraText3.setGeometry(550, 130, 150, 30)
         self.cameraText4.setGeometry(550, 170, 150, 30)
-        
+        self.cameraText0.setStyleSheet("background:white;")
+        self.cameraText1.setStyleSheet("background:white;")
+        self.cameraText2.setStyleSheet("background:white;")
+        self.cameraText3.setStyleSheet("background:white;")
+        self.cameraText4.setStyleSheet("background:white;")   
         #End Edit Camera
         
         setCameraButton = QtGui.QPushButton("Set Cam",self)
@@ -64,17 +67,13 @@ class Rover(QtGui.QMainWindow):
         comboCameraSelect.addItem("camera2")
         comboCameraSelect.addItem("camera3")
         comboCameraSelect.addItem("camera4")
+        comboCameraSelect.setStyleSheet("background:white;color:black;")
+
 
         comboCameraSelect.activated[str].connect(self.onComboSelected)
         self.comboCameraSelect = comboCameraSelect
         
-        
-        
-        
-        
-        
-        
-        pic.setStyleSheet("image:url(/home/akash/Downloads/bulls.jpg);background-repeat:repat; ")
+        pic.setStyleSheet("image:url(/home/sblinux/Pictures/Bulls.jpg);background:white;background-repeat:repat; ")
         pic.setAttribute(0,1);
         pic.setAttribute(3,1);
       
@@ -110,6 +109,7 @@ class Rover(QtGui.QMainWindow):
         self.show()
         self.cam =None
     def onComboSelected(self):
+        camstr = 'C ' + str(self.comboCameraSelect.currentIndex())  
         pass
     def setCam(self):
         
