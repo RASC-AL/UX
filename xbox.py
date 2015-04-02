@@ -12,7 +12,7 @@ def send_data(msg):
 		msg = msg + "\n"
 		print msg
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		sock.connect(("166.143.225.234", 9999))
+		sock.connect(("128.205.54.5", 9999))
 		totalsent = 0
 		print "Am inside send Data"
 		while totalsent < len(msg):
@@ -158,14 +158,14 @@ class xbox(QtCore.QThread):
 		    leftMotorSend = ((self.leftMotor) * 500) + 1500
 		        
 		    self.Command = "l" + str(int(round(shoulderSend))) + "," + str(int(round(elbowSend))) + "," + str(int(round(baseSend))) + "," + str(int(round(manipulatorSend))) + "," + str(int(round(self.clawState))) + "," + str(int(round(rightMotorSend))) + "," + str(int(round(leftMotorSend))) + ",";
-		    print "awra"
 		    print self.Command
-		    #self.send_data(self.Command)	
+		    send_data(self.Command)	
 		
 		    print self.Command
 		    self.Command = ""
 		    # Limit to 16 frames per second
-		    time.sleep(125)
+		    time.sleep(.125)
+                    print("fheiuer")
 		    #clock.tick(16)
 		    #self.clear()
 		    

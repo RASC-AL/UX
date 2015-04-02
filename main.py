@@ -117,7 +117,7 @@ class Rover(QtGui.QMainWindow):
         self.cam =None
                             
     def onComboSelected(self):
-        camstr = 'C ' + str(self.comboCameraSelect.currentIndex()) 
+        camstr = 'C' + str(self.comboCameraSelect.currentIndex()) + ',30,640,480'
 	print camstr
 	send_data(camstr) 
         pass
@@ -149,10 +149,12 @@ class Rover(QtGui.QMainWindow):
         
     def startXbox(self):
 	         
-	if(self.xbox==None):  
+	if(self.xbox==None):
+            print("SFDFSDF")  
             self.xbox = xbox() 	    
 	    self.xbox.start()  
         else:
+            print("GGGGGGG")
             self.xbox.stop() 
 	      
         
