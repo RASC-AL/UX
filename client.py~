@@ -28,7 +28,7 @@ class client:
         while bytes_recd < self.MSGLEN:
             chunk = self.sock.recv(min(self.MSGLEN - bytes_recd, 2048))
             if chunk == '':
-                break
+                raise RuntimeError("socket connection broken")
             chunks.append(chunk)
             bytes_recd = bytes_recd + len(chunk)
             if "\n" in chunk:

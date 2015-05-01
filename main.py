@@ -9,7 +9,32 @@ import server
 from PyQt4 import QtGui
 from cam import camThread
 from xbox import xbox
-from xbox import send_data
+from server import customServer
+
+
+port = 9999
+def send_data(msg):
+	msg = msg + "\n"
+	#print msg
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        ipAdd = socket.gethostbyname('sbrover2.eng.buffalo.edu')
+	sock.connect((ipAdd, 9999))  
+	totalsent = 0
+	#print "Am inside send Data"
+	while totalsent < len(msg):
+		sent = sock.send(msg[totalsent:])
+		if sent == 0:
+			raise RuntimeError("socket connection broken")
+		totalsent = totalsent + sent
+def ping(self, hostname):
+	if self.client is None or self.addr is None:
+		print "No client registered"
+		return
+	response = os.system("ping -c 1 " + addr)
+	if response == 0:
+		return True
+	else:
+		return False
 
 class Rover(QtGui.QMainWindow):
     
@@ -20,13 +45,13 @@ class Rover(QtGui.QMainWindow):
         self.setCentralWidget(self.editText)
         self.initUI()
 	self.xbox = None
-	self.startXbox()
+	self.server = None
+	self.startServer()
+	#self.startXbox()
         self.camValue = 0
         self.FPS = 15
         
     def initUI(self):   
-           
-       
 
 	#Labels for the xbox values# shoulderSend,elbowSend,baseSend,manipulatorSend,clawState,rightMotorSend,leftMotorSend
 	self.xboxLabelShoulder=QtGui.QLabel('',self)
@@ -55,55 +80,15 @@ class Rover(QtGui.QMainWindow):
 	self.metaInformation=QtGui.QLabel('Meta Information',self)
 	self.metaInformation.setGeometry(620, 650, 400, 50)
 	self.metaInformation.setStyleSheet("background:white;color:black;")
-	
-	
-	        
-        #Start Edit Camera
-            #Labels for Camera
-
-        self.cameraLabel0=QtGui.QLabel('Camera 0',self)
-        self.cameraLabel1=QtGui.QLabel('Camera 1',self)
-        self.cameraLabel2=QtGui.QLabel('Camera 2',self)
-        self.cameraLabel3=QtGui.QLabel('Camera 3',self)
-        self.cameraLabel4=QtGui.QLabel('Camera 4',self)
-        self.cameraLabel0.setGeometry(820, 10, 100, 30)
-        self.cameraLabel1.setGeometry(820, 50, 100, 30)
-        self.cameraLabel2.setGeometry(820, 90, 100, 30)
-        self.cameraLabel3.setGeometry(820, 130, 100, 30)
-        self.cameraLabel4.setGeometry(820, 170, 100, 30)
-
-        #TextEdits for Camera definition
-
-        self.cameraText0 = QtGui.QLineEdit(self)
-        self.cameraText1 = QtGui.QLineEdit(self)
-        self.cameraText2 = QtGui.QLineEdit(self)
-        self.cameraText3 = QtGui.QLineEdit(self)
-        self.cameraText4 = QtGui.QLineEdit(self)
-        self.cameraText0.setGeometry(920, 10, 150, 30)
-        self.cameraText1.setGeometry(920, 50, 150, 30)
-        self.cameraText2.setGeometry(920, 90, 150, 30)
-        self.cameraText3.setGeometry(920, 130, 150, 30)
-        self.cameraText4.setGeometry(920, 170, 150, 30)
-        self.cameraText0.setStyleSheet("background:white;")
-        self.cameraText1.setStyleSheet("background:white;")
-        self.cameraText2.setStyleSheet("background:white;")
-        self.cameraText3.setStyleSheet("background:white;")
-        self.cameraText4.setStyleSheet("background:white;")   
-        #End Edit Camera
+	#self.metaInformation.setTextFormat(0)  #Check
         
-        setCameraButton = QtGui.QPushButton("Set Cam",self)
-        setCameraButton.clicked.connect(self.setCam)
-        setCameraButton.setGeometry(820,210,90,60)       
-        setCameraButton.setStyleSheet("background:white;color:black;")
-        
-        #Camera Select ComboBox
+	#Camera Select ComboBox
         comboCameraSelect = QtGui.QComboBox(self)
-        comboCameraSelect.setGeometry(820, 280, 150, 50)
+        comboCameraSelect.setGeometry(350, 800, 90, 60)
         comboCameraSelect.addItem("camera0")
         comboCameraSelect.addItem("camera1")
         comboCameraSelect.addItem("camera2")
         comboCameraSelect.addItem("camera3")
-        comboCameraSelect.addItem("camera4")
         comboCameraSelect.setStyleSheet("background:white;color:black;")
 
 
@@ -112,7 +97,7 @@ class Rover(QtGui.QMainWindow):
         
         #FPS ComboBox
         comboFPSSelect = QtGui.QComboBox(self)
-        comboFPSSelect.setGeometry(820, 330, 150, 50)
+        comboFPSSelect.setGeometry(470, 800, 90, 60)
         comboFPSSelect.addItem("5")
         comboFPSSelect.addItem("10")
         comboFPSSelect.addItem("15")
@@ -120,14 +105,14 @@ class Rover(QtGui.QMainWindow):
         comboFPSSelect.addItem("25")
         comboFPSSelect.addItem("30")
         comboFPSSelect.setStyleSheet("background:white;color:black;")
-
+        comboFPSSelect.setCurrentIndex(2)
 
         comboFPSSelect.activated[str].connect(self.onComboFPSSelected)
         self.comboFPSSelect = comboFPSSelect
 
 	#The main Video widget	
 	pic = QtGui.QWidget(self)
-        pic.setGeometry(10, 10, 800, 620)
+        pic.setGeometry(10, 10, 1200, 620)
         pic.setStyleSheet("image:url(/home/sblinux/Pictures/Bulls.jpg);background:white;background-repeat:repat; ")
         pic.setAttribute(0,1);
         pic.setAttribute(3,1);
@@ -140,15 +125,20 @@ class Rover(QtGui.QMainWindow):
         
         stopButton = QtGui.QPushButton("Stop Cam",self)
         stopButton.clicked.connect(self.stopCam)
-        stopButton.setGeometry(480,650,90,60)
+        stopButton.setGeometry(470,650,90,60)
         stopButton.setStyleSheet("background:white;color:black; ")
 
         resetButton = QtGui.QPushButton("Reset",self)
         resetButton.clicked.connect(self.onResetClicked)
-        resetButton.setGeometry(950,210,90,60)
+        resetButton.setGeometry(350,720,90,60)
         resetButton.setStyleSheet("background:white;color:black; ")
-
-                 
+ 
+        blobButton = QtGui.QPushButton("Blob", self)
+        blobButton.clicked.connect(self.onBlobClicked)
+        blobButton.setGeometry(470, 720, 90, 60)
+        blobButton.setStyleSheet("background:white;color:black; ")
+        self.bButton = blobButton
+         
         QtGui.QApplication.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
         
         exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), '&Exit', self)        
@@ -165,7 +155,8 @@ class Rover(QtGui.QMainWindow):
         self.setStyleSheet("margin:5px; background:#0079E4; ")
         self.pic = pic
         self.center()
-        self.resize(825, 600)
+        self.showMaximized()
+	#self.resize(825, 600)
         self.setWindowIcon(QtGui.QIcon('/home/akash/Downloads/bulls1.jpg')) 
         self.setWindowTitle('Ub - Rasc-Al')
         self.show()
@@ -185,6 +176,10 @@ class Rover(QtGui.QMainWindow):
 
     def onResetClicked(self):
         send_data('R')
+
+    def onBlobClicked(self):
+        #Put web browser display code
+	self.bButton.setStyleSheet("background:green;color:black;")
 
     def setCam(self):
         #Set camera logic comes here    
@@ -216,25 +211,48 @@ class Rover(QtGui.QMainWindow):
 	         
 	if(self.xbox==None):  
             self.xbox = xbox() 	
-	    self.connect( self.xbox,  self.xbox.signal, self.testfunc)    
+	    self.connect( self.xbox,  self.xbox.signal, self.xboxCallBackfunc)    
 	    self.xbox.start() 
 	 
         else:
             self.xbox.stop() 
 	      
-    def testfunc(self,sigStr):
+    def xboxCallBackfunc(self,sigStr):
+	send_data(sigStr)
+	print sigStr	
 	signalArray = sigStr.split(',')
-	self.xboxLabelShoulder.setText("Shoulder "+signalArray[0])
+	self.xboxLabelShoulder.setText("Shoulder "+signalArray[0][1:])
 	self.xboxLabelElbow.setText("Elbow "+signalArray[1])
 	self.xboxLabelBase.setText("Base "+signalArray[2])
     	self.xboxLabelManipulator.setText("Manipulator "+signalArray[3])
 	self.xboxLabelClawState.setText("ClawState "+signalArray[4])
 	self.xboxLabelRightMotor.setText("RightMotor "+signalArray[5])
-	self.xboxLabelLeftMotor.setText("LeftMotor "+signalArray[6])
+	self.xboxLabelLeftMotor.setText("LeftMotor "+signalArray[6])	
 	
     def stopXbox(self):
         self.xbox.stop()
 
+       
+    def startServer(self):	         
+	if(self.server==None):  
+            self.server = customServer(port) 	
+	    self.connect( self.server,  self.server.signal, self.serverCallBackfunc)    
+	    self.server.start() 
+
+    def serverCallBackfunc(self,sigStr):
+	send_data(sigStr)
+        print(sigStr)
+        if(sigStr[0] == 'b'):
+            print(sigStr)
+	    if(sigStr[1] == '1'):
+                self.bButton.setStyleSheet("background:green;color:black;")
+            else:
+                self.bButton.setStyleSheet("background:white;color:black;")
+        elif(sigStr[0] == 'T'):
+            index = sigStr.find('+')
+            sigStr = "Temperature: " + sigStr[index+1:]
+            self.metaInformation.setText(sigStr)
+		
 class MyTextEdit(QtGui.QWidget):
     def __init__(self,parent):
         super(MyTextEdit, self).__init__(parent)                   
@@ -246,8 +264,6 @@ def main():
     ex = Rover()
     
     sys.exit(app.exec_())
-
-
 
 
 if __name__ == '__main__':

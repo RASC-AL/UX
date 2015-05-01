@@ -19,7 +19,7 @@ class customServer(QtCore.QThread):
 		self.connections = []
 		self.port = port
 		#TODO check ip
-		hostname = "128.205.55.128"    #"128.205.54.9"
+		hostname = "128.205.54.9"
 		self.serv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		#self.serv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR)
 		self.serv.bind((hostname, int(port)))
@@ -45,8 +45,8 @@ class customServer(QtCore.QThread):
 		self.client.send(data)
 
 	def receive(self):
-		someString =  self.client.receive()
-		self.emit(self.signal, someString)
+		print self.client.receive()
+		self.emit(self.signal, self.client.receive())
 		sys.stdout.flush()
 
 

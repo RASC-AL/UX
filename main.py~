@@ -9,7 +9,31 @@ import server
 from PyQt4 import QtGui
 from cam import camThread
 from xbox import xbox
-from xbox import send_data
+from server import customServer
+
+
+port = 9999
+def send_data(msg):
+	msg = msg + "\n"
+	#print msg
+	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	sock.connect(("128.205.54.5", 9999))
+	totalsent = 0
+	print "Am inside send Data"
+	while totalsent < len(msg):
+		sent = sock.send(msg[totalsent:])
+		if sent == 0:
+			raise RuntimeError("socket connection broken")
+		totalsent = totalsent + sent
+def ping(self, hostname):
+	if self.client is None or self.addr is None:
+		print "No client registered"
+		return
+	response = os.system("ping -c 1 " + addr)
+	if response == 0:
+		return True
+	else:
+		return False
 
 class Rover(QtGui.QMainWindow):
     
@@ -20,13 +44,13 @@ class Rover(QtGui.QMainWindow):
         self.setCentralWidget(self.editText)
         self.initUI()
 	self.xbox = None
+	self.server = None
+	self.startServer()
 	self.startXbox()
         self.camValue = 0
         self.FPS = 15
         
     def initUI(self):   
-           
-       
 
 	#Labels for the xbox values# shoulderSend,elbowSend,baseSend,manipulatorSend,clawState,rightMotorSend,leftMotorSend
 	self.xboxLabelShoulder=QtGui.QLabel('',self)
@@ -53,9 +77,8 @@ class Rover(QtGui.QMainWindow):
 
 	#Label for the temperature
 	self.metaInformation=QtGui.QLabel('Meta Information',self)
-	self.metaInformation.setGeometry(620, 650, 300, 50)
+	self.metaInformation.setGeometry(620, 650, 400, 50)
 	self.metaInformation.setStyleSheet("background:white;color:black;")
-	
 	
 	        
         #Start Edit Camera
@@ -165,7 +188,8 @@ class Rover(QtGui.QMainWindow):
         self.setStyleSheet("margin:5px; background:#0079E4; ")
         self.pic = pic
         self.center()
-        self.resize(825, 600)
+        self.showMaximized()
+	#self.resize(825, 600)
         self.setWindowIcon(QtGui.QIcon('/home/akash/Downloads/bulls1.jpg')) 
         self.setWindowTitle('Ub - Rasc-Al')
         self.show()
@@ -216,25 +240,37 @@ class Rover(QtGui.QMainWindow):
 	         
 	if(self.xbox==None):  
             self.xbox = xbox() 	
-	    self.connect( self.xbox,  self.xbox.signal, self.testfunc)    
+	    self.connect( self.xbox,  self.xbox.signal, self.xboxCallBackfunc)    
 	    self.xbox.start() 
 	 
         else:
             self.xbox.stop() 
 	      
-    def testfunc(self,sigStr):
+    def xboxCallBackfunc(self,sigStr):
+	# send_data(sigStr)
+	print sigStr	
 	signalArray = sigStr.split(',')
-	self.xboxLabelShoulder.setText("Shoulder "+signalArray[0])
+	self.xboxLabelShoulder.setText("Shoulder "+signalArray[0][1:])
 	self.xboxLabelElbow.setText("Elbow "+signalArray[1])
 	self.xboxLabelBase.setText("Base "+signalArray[2])
     	self.xboxLabelManipulator.setText("Manipulator "+signalArray[3])
 	self.xboxLabelClawState.setText("ClawState "+signalArray[4])
 	self.xboxLabelRightMotor.setText("RightMotor "+signalArray[5])
-	self.xboxLabelLeftMotor.setText("LeftMotor "+signalArray[6])
+	self.xboxLabelLeftMotor.setText("LeftMotor "+signalArray[6])	
 	
     def stopXbox(self):
         self.xbox.stop()
 
+       
+    def startServer(self):	         
+	if(self.server==None):  
+            self.server = customServer(port) 	
+	    self.connect( self.server,  self.server.signal, self.serverCallBackfunc)    
+	    self.server.start() 
+    def serverCallBackfunc(self,sigStr):
+	send_data(sigStr)
+	self.metaInformation.setText(sigStr)
+		
 class MyTextEdit(QtGui.QWidget):
     def __init__(self,parent):
         super(MyTextEdit, self).__init__(parent)                   

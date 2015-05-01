@@ -8,18 +8,7 @@ import gobject
 gobject.threads_init()
 import gst
 
-def send_data(msg):
-		msg = msg + "\n"
-		#print msg
-		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		sock.connect(("128.205.54.5", 9999))
-		totalsent = 0
-		print "Am inside send Data"
-		while totalsent < len(msg):
-			sent = sock.send(msg[totalsent:])
-			if sent == 0:
-				raise RuntimeError("socket connection broken")
-			totalsent = totalsent + sent
+
 
 class xbox(QtCore.QThread):
 	
@@ -40,7 +29,9 @@ class xbox(QtCore.QThread):
 		self.leftMotor = 5.001;
 		
 		self.instructionsPerSec = 8.0
-		
+	        
+                self.speedMod = 1.0
+ 	
 		self.clear = lambda: os.system('cls')
 		
 		pygame.init()
@@ -85,10 +76,11 @@ class xbox(QtCore.QThread):
 		
 		    joy2_left = joystick2.get_axis( 1 )
 		    joy2_right = joystick2.get_axis( 4 )
+                    joy2_righttrigger = joystick2.get_axis( 5 )
 		    
-		    if (abs(joy1_left) < 0.15):
+		    if (abs(joy1_left) < 0.25):
 		        joy1_left = 0            
-		    if (abs(joy1_right) < 0.15):
+		    if (abs(joy1_right) < 0.25):
 		        joy1_right = 0    
 		    if (joy1_lefttrigger < 0):
 		        joy1_lefttrigger = 0    
@@ -96,9 +88,9 @@ class xbox(QtCore.QThread):
 		        joy1_righttrigger = 0
 		    
 		
-		    if (abs(joy2_left) < 0.15):
+		    if (abs(joy2_left) < 0.25):
 		        joy2_left = 0            
-		    if (abs(joy2_right) < 0.15):
+		    if (abs(joy2_right) < 0.25):
 		        joy2_right = 0        
 		    
 		    if(joystick.get_button(0) ==  1):
@@ -120,9 +112,16 @@ class xbox(QtCore.QThread):
 		    self.shoulderPosition += joy1_left/(-senbigact) #Y
 		    
 		    self.basePosition += (joy1_lefttrigger-joy1_righttrigger)/(senservo) #
-		    
-		    self.rightMotor = joy2_right/(sensmotor)
-		    self.leftMotor = -joy2_left/(sensmotor)
+                    
+
+                    print(joy2_righttrigger)
+                    if(joy2_righttrigger > .15):
+			self.speedMod = 2.0
+ 		    else:
+			self.speedMod = 1.0
+
+		    self.rightMotor = (-joy2_right * self.speedMod)/(sensmotor)
+		    self.leftMotor = (-joy2_left * self.speedMod)/(sensmotor)
 		    
 		    if (abs(self.elbowPosition) > 10):
 		        self.elbowPosition = 10
@@ -160,14 +159,14 @@ class xbox(QtCore.QThread):
 		        
 		    self.Command = "l" + str(int(round(shoulderSend))) + "," + str(int(round(elbowSend))) + "," + str(int(round(baseSend))) + "," + str(int(round(manipulatorSend))) + "," + str(int(round(self.clawState))) + "," + str(int(round(rightMotorSend))) + "," + str(int(round(leftMotorSend))) + ",";
 		    #print self.Command
-		    #send_data(self.Command)	
+		  
 		
 		    self.emit(self.signal, self.Command)
 		    self.Command = ""
 		    # Limit to 16 frames per second
 		    time.sleep(.125)
 		
-                    print("fheiuer")
+                    
 		    #clock.tick(16)
 		    #self.clear()
 		    
