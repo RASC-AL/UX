@@ -2,17 +2,14 @@ import pygame
 import os
 import time
 import socket
-
+import globals
 from PyQt4 import QtCore
 import gobject
 gobject.threads_init()
 import gst
 
-
-
 class xbox(QtCore.QThread):
 	
-
 	def __init__(self):
 		QtCore.QThread.__init__(self)
 		self.signal = QtCore.SIGNAL("signal")
@@ -55,7 +52,6 @@ class xbox(QtCore.QThread):
 		pygame.quit ()
 	def run(self):
 		# -------- Main Program Loop -----------
-		
 		while self.done==False:
 		    print "Am inside xbox main loop"
 		    # EVENT PROCESSING STEP
@@ -92,77 +88,91 @@ class xbox(QtCore.QThread):
 		        joy2_left = 0            
 		    if (abs(joy2_right) < 0.25):
 		        joy2_right = 0        
-		    
-		    if(joystick.get_button(0) ==  1):
-		        self.clawState = 1        
-		    if(joystick.get_button(1) ==  1):
-		        self.clawState = 0
-		
-		    senservo = 4 *  (self.instructionsPerSec / 16)
-		    senbigact = 16 * (self.instructionsPerSec / 16)
-		    sensmallact = 17 * (self.instructionsPerSec / 16)
-		    
-		    sensmotor = 4 * (self.instructionsPerSec / 16)
-		    
-		    if(joystick.get_button( 5 )):
-		        self.manipulatorPosition += joy1_right/(-senservo) #X        
-		    else:
-		        self.elbowPosition += joy1_right/(-sensmallact) #X
-		        
-		    self.shoulderPosition += joy1_left/(-senbigact) #Y
-		    
-		    self.basePosition += (joy1_lefttrigger-joy1_righttrigger)/(senservo) #
                     
+                    senservo = 4 *  (self.instructionsPerSec / 16)
+                    senbigact = 30 * (self.instructionsPerSec / 16)
+                    sensmallact = 17 * (self.instructionsPerSec / 16)
 
-                    print(joy2_righttrigger)
-                    if(joy2_righttrigger > .15):
-			self.speedMod = 2.0
- 		    else:
-			self.speedMod = 1.0
+                    sensmotor = 4 * (self.instructionsPerSec / 16)
+	            
+                    print(time.time() - globals.now)	    
+                    if(time.time() - globals.now < 1):
+		    #if(1):
+                        if(joystick.get_button(0) ==  1):
+		            self.clawState = 1        
+		        if(joystick.get_button(1) ==  1):
+		            self.clawState = 0
+		
+		        if(joystick.get_button( 5 )):
+		            self.manipulatorPosition += joy1_right/(-senservo) #X        
+		        else:
+		            self.elbowPosition += joy1_right/(-sensmallact) #X
+		        
+		        self.shoulderPosition += joy1_left/(-senbigact) #Y
+		    
+		        self.basePosition += (joy1_lefttrigger-joy1_righttrigger)/(senservo) #
+                        
+                        #Drop position (X)
+                        if(joystick.get_button(2)):
+                            self.elbowPosition = .5
+                            self.shoulderPosition = .25
+                            self.basePosition = 9.375
 
-		    self.rightMotor = (-joy2_right * self.speedMod)/(sensmotor)
-		    self.leftMotor = (-joy2_left * self.speedMod)/(sensmotor)
+                        #Home Position (Y)
+                        elif(joystick.get_button(3)):
+                            pass
+
+
+                        print(joy2_righttrigger)
+
+                        if(joy2_righttrigger > .15):
+			    self.speedMod = 2.0
+ 		        else:
+			    self.speedMod = 1.0
+
+		        self.rightMotor = (-joy2_right * self.speedMod)/(sensmotor)
+		        self.leftMotor = (-joy2_left * self.speedMod)/(sensmotor)
 		    
-		    if (abs(self.elbowPosition) > 10):
-		        self.elbowPosition = 10
+		        if (abs(self.elbowPosition) > 10):
+		            self.elbowPosition = 10
 		                
-		    if (abs(self.shoulderPosition) > 10):
-		        self.shoulderPosition = 10
+		        if (abs(self.shoulderPosition) > 10):
+		            self.shoulderPosition = 10
 		        
-		    if (abs(self.basePosition) > 10):
-		        self.basePosition = 10
+		        if (abs(self.basePosition) > 10):
+		            self.basePosition = 10
 		    
-		    if (abs(self.manipulatorPosition) > 10):
-		        self.manipulatorPosition = 10
+		        if (abs(self.manipulatorPosition) > 10):
+		            self.manipulatorPosition = 10
 		                
-		    if (self.manipulatorPosition < 0):
-		        self.manipulatorPosition = 0
+		        if (self.manipulatorPosition < 0):
+		            self.manipulatorPosition = 0
 		        
-		    if (self.elbowPosition < 0):
-		        self.elbowPosition = 0
+		        if (self.elbowPosition < 0):
+		            self.elbowPosition = 0
 		                
-		    if (self.shoulderPosition < 0):
-		        self.shoulderPosition = 0
+		        if (self.shoulderPosition < 0):
+		            self.shoulderPosition = 0
 		                
-		    if (self.basePosition < 0):
-		        self.basePosition = 0
+		        if (self.basePosition < 0):
+		            self.basePosition = 0
 		  
-		    elbowSend = ((self.elbowPosition / 10) * 1000) + 1000
-		    shoulderSend = ((self.shoulderPosition / 10) * 1000) + 1000
+		        elbowSend = ((self.elbowPosition / 10) * 1000) + 1000
+		        shoulderSend = ((self.shoulderPosition / 10) * 1000) + 1000
 		    
-		    baseSend = ((self.basePosition/10) * 800) + 1100
+		        baseSend = ((self.basePosition/10) * 800) + 1100
 		    
-		    manipulatorSend = ((self.manipulatorPosition/10) * 1800) + 600
+		        manipulatorSend = ((self.manipulatorPosition/10) * 1800) + 600
 		
-		    rightMotorSend = ((self.rightMotor) * 500) + 1500
-		    leftMotorSend = ((self.leftMotor) * 500) + 1500
-		        
-		    self.Command = "l" + str(int(round(shoulderSend))) + "," + str(int(round(elbowSend))) + "," + str(int(round(baseSend))) + "," + str(int(round(manipulatorSend))) + "," + str(int(round(self.clawState))) + "," + str(int(round(rightMotorSend))) + "," + str(int(round(leftMotorSend))) + ",";
-		    #print self.Command
+		        rightMotorSend = ((self.rightMotor) * 500) + 1500
+		        leftMotorSend = ((self.leftMotor) * 500) + 1500
+
+		        self.Command = "l" + str(int(round(elbowSend))) + "," + str(int(round(shoulderSend))) + "," + str(int(round(baseSend))) + "," + str(int(round(manipulatorSend))) + "," + str(int(round(self.clawState))) + "," + str(int(round(rightMotorSend))) + "," + str(int(round(leftMotorSend))) + ",";
+		        print self.Command
 		  
 		
-		    self.emit(self.signal, self.Command)
-		    self.Command = ""
+		        self.emit(self.signal, self.Command)
+		        self.Command = ""
 		    # Limit to 16 frames per second
 		    time.sleep(.125)
 		

@@ -6,11 +6,12 @@ Created on Feb 6, 2015
 import sys
 import socket
 import server
+import time
+import globals
 from PyQt4 import QtGui
 from cam import camThread
 from xbox import xbox
 from server import customServer
-
 
 port = 9999
 def send_data(msg):
@@ -18,7 +19,7 @@ def send_data(msg):
 	#print msg
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         ipAdd = socket.gethostbyname('sbrover2.eng.buffalo.edu')
-	sock.connect((ipAdd, 9999))  
+        sock.connect((ipAdd, 9999))  
 	totalsent = 0
 	#print "Am inside send Data"
 	while totalsent < len(msg):
@@ -37,17 +38,19 @@ def ping(self, hostname):
 		return False
 
 class Rover(QtGui.QMainWindow):
-    
+
     def __init__(self):
 
         super(Rover, self).__init__()
+        globals.init()
+        globals.now = time.time()
         self.editText = MyTextEdit(self)
         self.setCentralWidget(self.editText)
         self.initUI()
 	self.xbox = None
 	self.server = None
 	self.startServer()
-	#self.startXbox()
+	self.startXbox()
         self.camValue = 0
         self.FPS = 15
         
@@ -219,10 +222,10 @@ class Rover(QtGui.QMainWindow):
 	      
     def xboxCallBackfunc(self,sigStr):
 	send_data(sigStr)
-	print sigStr	
+	#print sigStr	
 	signalArray = sigStr.split(',')
-	self.xboxLabelShoulder.setText("Shoulder "+signalArray[0][1:])
-	self.xboxLabelElbow.setText("Elbow "+signalArray[1])
+	self.xboxLabelShoulder.setText("Shoulder "+signalArray[1])
+	self.xboxLabelElbow.setText("Elbow "+signalArray[0][1:])
 	self.xboxLabelBase.setText("Base "+signalArray[2])
     	self.xboxLabelManipulator.setText("Manipulator "+signalArray[3])
 	self.xboxLabelClawState.setText("ClawState "+signalArray[4])
@@ -232,7 +235,6 @@ class Rover(QtGui.QMainWindow):
     def stopXbox(self):
         self.xbox.stop()
 
-       
     def startServer(self):	         
 	if(self.server==None):  
             self.server = customServer(port) 	
@@ -241,14 +243,15 @@ class Rover(QtGui.QMainWindow):
 
     def serverCallBackfunc(self,sigStr):
 	send_data(sigStr)
-        print(sigStr)
+        #print(sigStr)
         if(sigStr[0] == 'b'):
-            print(sigStr)
+            #print(sigStr)
 	    if(sigStr[1] == '1'):
                 self.bButton.setStyleSheet("background:green;color:black;")
             else:
                 self.bButton.setStyleSheet("background:white;color:black;")
         elif(sigStr[0] == 'T'):
+            globals.now = time.time()
             index = sigStr.find('+')
             sigStr = "Temperature: " + sigStr[index+1:]
             self.metaInformation.setText(sigStr)
