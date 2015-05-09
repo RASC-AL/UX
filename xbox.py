@@ -8,6 +8,11 @@ import gobject
 gobject.threads_init()
 import gst
 
+flag = 0
+
+dropTime = 0
+homeTime = 0
+
 class xbox(QtCore.QThread):
 	
 	def __init__(self):
@@ -51,6 +56,7 @@ class xbox(QtCore.QThread):
 		self.done = true
 		pygame.quit ()
 	def run(self):
+                global dropTime, homeTime, flag
 		# -------- Main Program Loop -----------
 		while self.done==False:
 		    print "Am inside xbox main loop"
@@ -113,10 +119,11 @@ class xbox(QtCore.QThread):
 		        self.basePosition += (joy1_lefttrigger-joy1_righttrigger)/(senservo) #
                         
                         #Drop position (X)
-                        if(joystick.get_button(2)):
+                        if(joystick.get_button(2) and flag == 0):
                             self.elbowPosition = .5
-                            self.shoulderPosition = .25
-                            self.basePosition = 9.375
+                            self.shoulderPosition = .5
+                            flag = 2
+                            dropTime = time.time()
 
                         #Home Position (Y)
                         elif(joystick.get_button(3)):
@@ -170,9 +177,20 @@ class xbox(QtCore.QThread):
 		        self.Command = "l" + str(int(round(elbowSend))) + "," + str(int(round(shoulderSend))) + "," + str(int(round(baseSend))) + "," + str(int(round(manipulatorSend))) + "," + str(int(round(self.clawState))) + "," + str(int(round(rightMotorSend))) + "," + str(int(round(leftMotorSend))) + ",";
 		        print self.Command
 		  
-		
 		        self.emit(self.signal, self.Command)
 		        self.Command = ""
+                       
+                        #Drop position (X)
+                        if(flag == 2 and time.time() - dropTime > 10):
+                            self.basePosition = 9.375
+                            flag = 0
+
+                        #Home Position (Y)
+                        elif(joystick.get_button(3)):
+                            pass
+
+
+
 		    # Limit to 16 frames per second
 		    time.sleep(.125)
 		
