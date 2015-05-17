@@ -192,7 +192,7 @@ class xbox(QtCore.QThread):
 
 
 		    # Limit to 16 frames per second
-		    time.sleep(.125)
+		    time.sleep(.5)
 		
                     
 		    #clock.tick(16)

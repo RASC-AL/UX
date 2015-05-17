@@ -6,12 +6,14 @@ Created on Feb 6, 2015
 import sys
 import socket
 import server
-import time
-import globals
-from PyQt4 import QtGui, QtCore
+import datetime
+from PyQt4 import QtGui
 from cam import camThread
-from xbox import xbox
+from xbox import xbox, now
 from server import customServer
+
+import sys
+from PyQt4 import QtCore, QtGui, QtWebKit
 
 port = 9999
 def send_data(msg):
@@ -19,8 +21,7 @@ def send_data(msg):
 	#print msg
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         ipAdd = socket.gethostbyname('sbrover2.eng.buffalo.edu')
-        #sock.connect((ipAdd, 9999))  
-        sock.connect(('166.143.225.234', 9999))
+	sock.connect((ipAdd, 9999))  
 	totalsent = 0
 	#print "Am inside send Data"
 	while totalsent < len(msg):
@@ -38,13 +39,104 @@ def ping(self, hostname):
 	else:
 		return False
 
+class Browser(QtGui.QMainWindow):
+
+    def __init__(self):
+        """
+            Initialize the browser GUI and connect the events
+        """
+
+        QtGui.QMainWindow.__init__(self)
+        self.showMaximized()
+        self.centralwidget = QtGui.QWidget(self)
+
+        self.buttonBox = QtGui.QDialogButtonBox(self)
+        self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
+        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
+
+        self.textBrowser = QtGui.QTextBrowser(self)
+        self.textBrowser.append("This is a QTextBrowser!")
+
+        self.mainLayout = QtGui.QHBoxLayout(self.centralwidget)
+        self.mainLayout.setSpacing(0)
+        self.mainLayout.setMargin(1)
+
+        self.frame = QtGui.QFrame(self.centralwidget)
+
+        self.gridLayout = QtGui.QVBoxLayout(self.frame)
+        self.gridLayout.setMargin(0)
+        self.gridLayout.setSpacing(0)
+
+        self.horizontalLayout = QtGui.QHBoxLayout()
+        self.tb_url = QtGui.QLineEdit(self.frame)
+        self.bt_320 = QtGui.QPushButton(self.frame)
+        self.bt_640 = QtGui.QPushButton(self.frame)
+        self.bt_1080 = QtGui.QPushButton(self.frame)
+
+        self.bt_320.setText("320")
+        self.bt_640.setText("640")
+        self.bt_1080.setText("1080")
+        self.horizontalLayout.addWidget(self.bt_320)
+        self.horizontalLayout.addWidget(self.bt_640)
+        self.horizontalLayout.addWidget(self.bt_1080)
+        self.horizontalLayout.addWidget(self.tb_url)
+        self.gridLayout.addLayout(self.horizontalLayout)
+
+        self.html = QtWebKit.QWebView()
+        self.gridLayout.addWidget(self.html)
+        self.mainLayout.addWidget(self.frame)
+        self.setCentralWidget(self.centralwidget)
+
+        self.connect(self.tb_url, QtCore.SIGNAL("returnPressed()"), self.browse)
+        self.connect(self.bt_320, QtCore.SIGNAL("clicked()"), self.set_res_320)
+        self.connect(self.bt_640, QtCore.SIGNAL("clicked()"), self.set_res_640)
+        self.connect(self.bt_1080, QtCore.SIGNAL("clicked()"), self.set_res_1080)
+
+        self.default_url = "http://localhost:8080/stream?topic=/blob?width=3840?height=1080"
+        self.tb_url.setText(self.default_url)
+        self.browse()
+
+        self.raise_()
+        self.activateWindow()
+
+    def browse(self):
+        """
+            Make a web browse on a specific url and show the page on the
+            Webview widget.
+        """
+
+        url = self.tb_url.text() if self.tb_url.text() else self.default_url
+        self.html.load(QtCore.QUrl(url))
+        self.html.show()
+
+    def set_res_1080(self):
+
+        url = "http://localhost:8080/stream?topic=/blob?width=3840?height=1080"
+        self.html.load(QtCore.QUrl(url))
+        self.tb_url.setText(url)
+        self.html.show()
+
+    def set_res_640(self):
+    	
+        url = "http://localhost:8080/stream?topic=/blob?width=1280?height=480"
+        self.html.load(QtCore.QUrl(url))
+        self.tb_url.setText(url)
+        self.html.show()
+
+    def set_res_320(self):
+    	
+        url = "http://localhost:8080/stream?topic=/blob?width=640?height=240"
+        self.html.load(QtCore.QUrl(url))
+        self.tb_url.setText(url)
+        self.html.show()
+
 class Rover(QtGui.QMainWindow):
 
     def __init__(self):
 
         super(Rover, self).__init__()
-        globals.init()
-        globals.now = time.time()
+        global now
+        now = datetime.datetime.now()
         self.editText = MyTextEdit(self)
         self.setCentralWidget(self.editText)
         self.initUI()
@@ -82,9 +174,8 @@ class Rover(QtGui.QMainWindow):
 
 	#Label for the temperature
 	self.metaInformation=QtGui.QLabel('Meta Information',self)
-	self.metaInformation.setGeometry(620, 650, 400, 40)
+	self.metaInformation.setGeometry(620, 650, 400, 50)
 	self.metaInformation.setStyleSheet("background:white;color:black;")
-        self.metaInformation.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
 	#self.metaInformation.setTextFormat(0)  #Check
         
 	#Camera Select ComboBox
@@ -184,7 +275,9 @@ class Rover(QtGui.QMainWindow):
 
     def onBlobClicked(self):
         #Put web browser display code
-	self.bButton.setStyleSheet("background:green;color:black;")
+        self.bButton.setStyleSheet("background:green;color:black;")
+        web = Browser()
+        web.show()        
 
     def setCam(self):
         #Set camera logic comes here    
@@ -253,7 +346,8 @@ class Rover(QtGui.QMainWindow):
             else:
                 self.bButton.setStyleSheet("background:white;color:black;")
         elif(sigStr[0] == 'T'):
-            globals.now = time.time()
+            global now 
+            now = datetime.datetime.now()
             index = sigStr.find('+')
             sigStr = "Temperature: " + sigStr[index+1:]
             self.metaInformation.setText(sigStr)

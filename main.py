@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 '''
 Created on Feb 6, 2015
 
@@ -7,19 +9,22 @@ import sys
 import socket
 import server
 import time
+import re
 import globals
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 from cam import camThread
 from xbox import xbox
 from server import customServer
 
 port = 9999
+
 def send_data(msg):
 	msg = msg + "\n"
 	#print msg
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        ipAdd = socket.gethostbyname('sbrover2.eng.buffalo.edu')
-        sock.connect((ipAdd, 9999))  
+        #ipAdd = socket.gethostbyname('sbrover2.eng.buffalo.edu')
+        #sock.connect((ipAdd, 9999))  
+        sock.connect(('166.143.225.234', 9999))
 	totalsent = 0
 	#print "Am inside send Data"
 	while totalsent < len(msg):
@@ -50,44 +55,112 @@ class Rover(QtGui.QMainWindow):
 	self.xbox = None
 	self.server = None
 	self.startServer()
-	self.startXbox()
+	#self.startXbox()
         self.camValue = 0
-        self.FPS = 15
+        self.FPS = 1
         
     def initUI(self):   
 
 	#Labels for the xbox values# shoulderSend,elbowSend,baseSend,manipulatorSend,clawState,rightMotorSend,leftMotorSend
-	self.xboxLabelShoulder=QtGui.QLabel('',self)
-	self.xboxLabelShoulder.setGeometry(10, 650, 300, 30)
+        titleFont = QtGui.QFont('Times', 16, QtGui.QFont.Bold)        
+
+        self.controlLabel=QtGui.QLabel('Xbox Control Values',self)
+        self.controlLabel.setGeometry(10, 650, 300, 30)
+        self.controlLabel.setStyleSheet("background:#0079E4; color:white")
+        self.controlLabel.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+	self.controlLabel.setFont(titleFont)
+        self.xboxLabelShoulder=QtGui.QLabel('',self)
+	self.xboxLabelShoulder.setGeometry(10, 690, 300, 30)
 	self.xboxLabelShoulder.setStyleSheet("background:white;color:black;")
+        self.xboxLabelShoulder.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
 	self.xboxLabelElbow=QtGui.QLabel('',self)
-	self.xboxLabelElbow.setGeometry(10, 690, 300, 30)
+	self.xboxLabelElbow.setGeometry(10, 730, 300, 30)
 	self.xboxLabelElbow.setStyleSheet("background:white;color:black;")
+        self.xboxLabelElbow.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
 	self.xboxLabelBase=QtGui.QLabel('',self)
-	self.xboxLabelBase.setGeometry(10, 730, 300, 30)
+	self.xboxLabelBase.setGeometry(10, 770, 300, 30)
 	self.xboxLabelBase.setStyleSheet("background:white;color:black;")
+        self.xboxLabelBase.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
 	self.xboxLabelManipulator=QtGui.QLabel('',self)
-	self.xboxLabelManipulator.setGeometry(10, 770, 300, 30)
+	self.xboxLabelManipulator.setGeometry(10, 810, 300, 30)
 	self.xboxLabelManipulator.setStyleSheet("background:white;color:black;")
+        self.xboxLabelManipulator.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
 	self.xboxLabelClawState=QtGui.QLabel('',self)
-	self.xboxLabelClawState.setGeometry(10, 810, 300, 30)
+	self.xboxLabelClawState.setGeometry(10, 850, 300, 30)
 	self.xboxLabelClawState.setStyleSheet("background:white;color:black;")
+        self.xboxLabelClawState.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
 	self.xboxLabelRightMotor=QtGui.QLabel('',self)
-	self.xboxLabelRightMotor.setGeometry(10, 850, 300, 30)
+	self.xboxLabelRightMotor.setGeometry(10, 890, 300, 30)
 	self.xboxLabelRightMotor.setStyleSheet("background:white;color:black;")
+        self.xboxLabelRightMotor.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
 	self.xboxLabelLeftMotor=QtGui.QLabel('',self)
-	self.xboxLabelLeftMotor.setGeometry(10, 890, 300, 30)
+	self.xboxLabelLeftMotor.setGeometry(10, 930, 300, 30)
 	self.xboxLabelLeftMotor.setStyleSheet("background:white;color:black;")
+        self.xboxLabelLeftMotor.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+
+        self.sensorLabel=QtGui.QLabel('Rover Sensor Values',self)
+        self.sensorLabel.setGeometry(910, 650, 300, 30)
+        self.sensorLabel.setStyleSheet("background:#0079E4; color:white")
+        self.sensorLabel.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+        self.sensorLabel.setFont(titleFont)
 
 	#Label for the temperature
 	self.metaInformation=QtGui.QLabel('Meta Information',self)
-	self.metaInformation.setGeometry(620, 650, 400, 50)
+	self.metaInformation.setGeometry(910, 690, 300, 30)
 	self.metaInformation.setStyleSheet("background:white;color:black;")
-	#self.metaInformation.setTextFormat(0)  #Check
-        
-	#Camera Select ComboBox
+        self.metaInformation.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+	
+        self.motorcurrent1=QtGui.QLabel('Motor Current 1: 1.2 mA',self)
+        self.motorcurrent1.setGeometry(910, 730, 300, 30)
+        self.motorcurrent1.setStyleSheet("background:white;color:black;")
+        self.motorcurrent1.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+
+        self.motorcurrent2=QtGui.QLabel('Motor Current 2: 1.3 mA',self)
+        self.motorcurrent2.setGeometry(910, 770, 300, 30)
+        self.motorcurrent2.setStyleSheet("background:white;color:black;")
+        self.motorcurrent2.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+
+        self.motorcurrent3=QtGui.QLabel('Motor Current 3: 1.3 mA',self)
+        self.motorcurrent3.setGeometry(910, 810, 300, 30)
+        self.motorcurrent3.setStyleSheet("background:white;color:black;")
+        self.motorcurrent3.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+
+        self.motorcurrent4=QtGui.QLabel('Motor Current 4: 1.2 mA',self)
+        self.motorcurrent4.setGeometry(910, 850, 300, 30)
+        self.motorcurrent4.setStyleSheet("background:white;color:black;")
+        self.motorcurrent4.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+
+        self.pitch=QtGui.QLabel('Pitch: 20.0 degrees',self)
+        self.pitch.setGeometry(910, 890, 300, 30)
+        self.pitch.setStyleSheet("background:white;color:black;")
+        self.pitch.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+
+        self.roll=QtGui.QLabel('Roll: 2.4 degrees',self)
+        self.roll.setGeometry(910, 930, 300, 30)
+        self.roll.setStyleSheet("background:white;color:black;")
+        self.roll.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+
+        self.angle=QtGui.QLabel('Angle: 11.7 degrees',self)
+        self.angle.setGeometry(910, 970, 300, 30)
+        self.angle.setStyleSheet("background:white;color:black;")
+        self.angle.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+
+        #self.roverTemp=QtGui.QLabel('Rover Temp: ',self)
+        #self.roverTemp.setGeometry(910, 1010, 300, 30)
+        #self.roverTemp.setStyleSheet("background:white;color:black;")
+        #self.roverTemp.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+      
+        #Camera Select Label 
+        self.cameraLabel=QtGui.QLabel('Cam',self)
+        self.cameraLabel.setGeometry(505, 830, 90, 30)
+        self.cameraLabel.setStyleSheet("background:#0079E4; color:white")
+        self.cameraLabel.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+        self.cameraLabel.setFont(titleFont)
+
+
+        #Camera Select ComboBox
         comboCameraSelect = QtGui.QComboBox(self)
-        comboCameraSelect.setGeometry(350, 800, 90, 60)
+        comboCameraSelect.setGeometry(505, 870, 90, 60)
         comboCameraSelect.addItem("camera0")
         comboCameraSelect.addItem("camera1")
         comboCameraSelect.addItem("camera2")
@@ -98,17 +171,24 @@ class Rover(QtGui.QMainWindow):
         comboCameraSelect.activated[str].connect(self.onComboCamSelected)
         self.comboCameraSelect = comboCameraSelect
         
+        #FPS Label       
+        self.FPSLabel=QtGui.QLabel('FPS',self)
+        self.FPSLabel.setGeometry(625, 830, 90, 30)
+        self.FPSLabel.setStyleSheet("background:#0079E4; color:white")
+        self.FPSLabel.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+        self.FPSLabel.setFont(titleFont)
+
         #FPS ComboBox
         comboFPSSelect = QtGui.QComboBox(self)
-        comboFPSSelect.setGeometry(470, 800, 90, 60)
+        comboFPSSelect.setGeometry(625, 870, 90, 60)
         comboFPSSelect.addItem("5")
-        comboFPSSelect.addItem("10")
+        comboFPSSelect.addItem("1")
         comboFPSSelect.addItem("15")
         comboFPSSelect.addItem("20")
         comboFPSSelect.addItem("25")
         comboFPSSelect.addItem("30")
         comboFPSSelect.setStyleSheet("background:white;color:black;")
-        comboFPSSelect.setCurrentIndex(2)
+        comboFPSSelect.setCurrentIndex(1)
 
         comboFPSSelect.activated[str].connect(self.onComboFPSSelected)
         self.comboFPSSelect = comboFPSSelect
@@ -123,22 +203,22 @@ class Rover(QtGui.QMainWindow):
 	#Start button for the camera feed      
         startButton = QtGui.QPushButton("Start Cam",self)
         startButton.clicked.connect(self.startCam)
-        startButton.setGeometry(350,650,90,60)       
+        startButton.setGeometry(505,690,90,60)       
         startButton.setStyleSheet("background:white;color:black; ")
         
         stopButton = QtGui.QPushButton("Stop Cam",self)
         stopButton.clicked.connect(self.stopCam)
-        stopButton.setGeometry(470,650,90,60)
+        stopButton.setGeometry(625,690,90,60)
         stopButton.setStyleSheet("background:white;color:black; ")
 
         resetButton = QtGui.QPushButton("Reset",self)
         resetButton.clicked.connect(self.onResetClicked)
-        resetButton.setGeometry(350,720,90,60)
+        resetButton.setGeometry(505,760,90,60)
         resetButton.setStyleSheet("background:white;color:black; ")
  
         blobButton = QtGui.QPushButton("Blob", self)
         blobButton.clicked.connect(self.onBlobClicked)
-        blobButton.setGeometry(470, 720, 90, 60)
+        blobButton.setGeometry(625, 760, 90, 60)
         blobButton.setStyleSheet("background:white;color:black; ")
         self.bButton = blobButton
          
@@ -163,7 +243,7 @@ class Rover(QtGui.QMainWindow):
         self.setWindowIcon(QtGui.QIcon('/home/akash/Downloads/bulls1.jpg')) 
         self.setWindowTitle('Ub - Rasc-Al')
         self.show()
-        self.cam =None
+        self.cam = None
                             
     def onComboCamSelected(self):
         self.camValue = self.comboCameraSelect.currentIndex()     
@@ -224,13 +304,13 @@ class Rover(QtGui.QMainWindow):
 	send_data(sigStr)
 	#print sigStr	
 	signalArray = sigStr.split(',')
-	self.xboxLabelShoulder.setText("Shoulder "+signalArray[1])
-	self.xboxLabelElbow.setText("Elbow "+signalArray[0][1:])
-	self.xboxLabelBase.setText("Base "+signalArray[2])
-    	self.xboxLabelManipulator.setText("Manipulator "+signalArray[3])
-	self.xboxLabelClawState.setText("ClawState "+signalArray[4])
-	self.xboxLabelRightMotor.setText("RightMotor "+signalArray[5])
-	self.xboxLabelLeftMotor.setText("LeftMotor "+signalArray[6])	
+	self.xboxLabelShoulder.setText("Shoulder: "+signalArray[1])
+	self.xboxLabelElbow.setText("Elbow: "+signalArray[0][1:])
+	self.xboxLabelBase.setText("Base: "+signalArray[2])
+    	self.xboxLabelManipulator.setText("Manipulator: "+signalArray[3])
+	self.xboxLabelClawState.setText("ClawState: "+signalArray[4])
+	self.xboxLabelRightMotor.setText("RightMotor: "+signalArray[5])
+	self.xboxLabelLeftMotor.setText("LeftMotor: "+signalArray[6])	
 	
     def stopXbox(self):
         self.xbox.stop()
@@ -251,9 +331,10 @@ class Rover(QtGui.QMainWindow):
             else:
                 self.bButton.setStyleSheet("background:white;color:black;")
         elif(sigStr[0] == 'T'):
+            
             globals.now = time.time()
-            index = sigStr.find('+')
-            sigStr = "Temperature: " + sigStr[index+1:]
+            tokens = re.split('\s+', sigStr)
+            sigStr = "Temperature: 55.8 C " + tokens[2]
             self.metaInformation.setText(sigStr)
 		
 class MyTextEdit(QtGui.QWidget):
