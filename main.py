@@ -16,22 +16,30 @@ from cam import camThread
 from xbox import xbox
 from server import customServer
 
+roverSocket = None
 port = 9999
 
 def send_data(msg):
-	msg = msg + "\n"
-	#print msg
-	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #ipAdd = socket.gethostbyname('sbrover2.eng.buffalo.edu')
-        #sock.connect((ipAdd, 9999))  
-        sock.connect(('166.143.225.234', 9999))
-	totalsent = 0
-	#print "Am inside send Data"
-	while totalsent < len(msg):
-		sent = sock.send(msg[totalsent:])
-		if sent == 0:
-			raise RuntimeError("socket connection broken")
-		totalsent = totalsent + sent
+    global roverSocket
+    ipAdd = socket.gethostbyname('sbrover2.eng.buffalo.edu')
+    try:
+        if roverSocket is None:
+            roverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            #roverSocket.connect((ipAdd, port))
+            roverSocket.connect(('166.143.225.234', 9999))
+        msg = msg + "\n"
+        totalsent = 0
+        while totalsent < len(msg):
+            sent = roverSocket.send(msg[totalsent:])
+            if sent == 0:
+                raise RuntimeError("socket connection broken")
+            totalsent = totalsent + sent
+    catch Exception, e:
+        if roverSocket is None:
+            return
+        roverSocket.close()
+        roverSocket = None
+
 def ping(self, hostname):
 	if self.client is None or self.addr is None:
 		print "No client registered"
