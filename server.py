@@ -33,6 +33,7 @@ class customServer(QtCore.QThread):
 			for sock in readsock:
 				if sock == self.serv:
 					(clientsocket, address) = self.serv.accept()
+					self.connections.append(clientsocket)
 					self.client = client.client(clientsocket)
 					self.addr = address
 					self.receive()				

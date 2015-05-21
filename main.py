@@ -11,13 +11,19 @@ import server
 import time
 import re
 import globals
+import cv2
+import urllib
+import Image
+from PIL import Image
+import PIL.Image
+import numpy as np
 from PyQt4 import QtGui, QtCore
 from cam import camThread
 from xbox import xbox
 from server import customServer
 
 roverSocket = None
-port = 9999
+port = 9999 
 
 def send_data(msg):
     global roverSocket
@@ -25,8 +31,8 @@ def send_data(msg):
     try:
         if roverSocket is None:
             roverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            #roverSocket.connect((ipAdd, port))
-            roverSocket.connect(('166.143.225.234', 9999))
+            roverSocket.connect((ipAdd, port))
+            #roverSocket.connect(('166.143.225.234', 9999))
         msg = msg + "\n"
         totalsent = 0
         while totalsent < len(msg):
@@ -34,7 +40,7 @@ def send_data(msg):
             if sent == 0:
                 raise RuntimeError("socket connection broken")
             totalsent = totalsent + sent
-    catch Exception, e:
+    except Exception, e:
         if roverSocket is None:
             return
         roverSocket.close()
@@ -63,9 +69,9 @@ class Rover(QtGui.QMainWindow):
 	self.xbox = None
 	self.server = None
 	self.startServer()
-	#self.startXbox()
+	self.startXbox()
         self.camValue = 0
-        self.FPS = 1
+        self.FPS = 15
         
     def initUI(self):   
 
@@ -190,13 +196,13 @@ class Rover(QtGui.QMainWindow):
         comboFPSSelect = QtGui.QComboBox(self)
         comboFPSSelect.setGeometry(625, 870, 90, 60)
         comboFPSSelect.addItem("5")
-        comboFPSSelect.addItem("1")
+        comboFPSSelect.addItem("10")
         comboFPSSelect.addItem("15")
         comboFPSSelect.addItem("20")
         comboFPSSelect.addItem("25")
         comboFPSSelect.addItem("30")
         comboFPSSelect.setStyleSheet("background:white;color:black;")
-        comboFPSSelect.setCurrentIndex(1)
+        comboFPSSelect.setCurrentIndex(2)
 
         comboFPSSelect.activated[str].connect(self.onComboFPSSelected)
         self.comboFPSSelect = comboFPSSelect
@@ -269,8 +275,28 @@ class Rover(QtGui.QMainWindow):
         send_data('R')
 
     def onBlobClicked(self):
-        #Put web browser display code
-	self.bButton.setStyleSheet("background:green;color:black;")
+        stream=urllib.urlopen('http://128.205.55.125:8080/stream?topic=/blob')
+        bytes=''
+        i = np.zeros((height,width,3), np.uint8)
+        while True:
+            bytes+=stream.read(10000)
+            a = bytes.find('\xff\xd8')
+            b = bytes.find('\xff\xd9')
+            if a!=-1 and b!=-1:
+                jpg = bytes[a:b+2]
+                bytes= bytes[b+2:]
+                i = cv2.imdecode(np.fromstring(jpg, dtype=np.uint8),cv2.CV_LOAD_IMAGE_COLOR)
+            cv2.namedWindow('blobs', cv2.WINDOW_AUTOSIZE)
+            cv2.imshow('blobs',i)
+            key = cv2.waitKey(30)
+            if key == 27:
+                cv2.destroyWindow('blobs')
+            elif key == ord('1'):
+                stream=urllib.urlopen('http://128.205.55.125:8080/stream?topic=/blob?width=3840?height=1080')
+            elif key == ord('2'):
+                stream=urllib.urlopen('http://128.205.55.125:8080/stream?topic=/blob?width=1280?height=480')
+            elif key == ord('3'):
+                stream=urllib.urlopen('http://128.205.55.125:8080/stream?topic=/blob?width=640?height=240')
 
     def setCam(self):
         #Set camera logic comes here    

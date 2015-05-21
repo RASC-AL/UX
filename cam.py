@@ -8,9 +8,11 @@ class camThread(QtCore.QThread):
     def __init__(self,windowId):
         QtCore.QThread.__init__(self)    
         self.windowId =windowId                                   
-       # self.player = gst.parse_launch("udpsrc port=1234 !  application/x-rtp, encoding-name=H264, payload=96 !  rtph264depay ! h264parse ! ffdec_h264 ! autovideosink async = false sync = false")                            
+       # self.player = gst.parse_launch("udpsrc port=3389 !  application/x-rtp, encoding-name=H264, payload=96 !  rtph264depay ! h264parse ! ffdec_h264 ! autovideosink async = false sync = false")                            
         
-        self.player = gst.parse_launch("udpsrc port=1234 ! application/x-rtp, payload=96, media=video, clock-rate=90000, encoding-name=MP4V-ES ! rtpmp4vdepay ! ffdec_mpeg4 ! ffmpegcolorspace ! xvimagesink async=false sync=false")
+        self.player = gst.parse_launch("udpsrc port=3389 ! application/x-rtp, payload=96, media=video, clock-rate=90000, encoding-name=MP4V-ES ! rtpmp4vdepay ! ffdec_mpeg4 ! ffmpegcolorspace ! xvimagesink sync=false")
+
+    #	self.player = gst.parse_launch('''udpsrc port=5632 ! "application/x-rtp, payload=96, media=video, clock-rate=90000, encoding-name=MP4V-ES" ! rtpmp4vdepay ! ffdec_mpeg4 ! ffmpegcolorspace ! videoscale ! video/x-raw-rgb, width=1030, height=768 ! autovideosink sync=false''')
 
         bus = self.player.get_bus()
         bus.add_signal_watch()

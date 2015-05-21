@@ -120,26 +120,37 @@ class xbox(QtCore.QThread):
                         
                         #Drop position (X)
                         if(joystick.get_button(2) and flag == 0):
-                            self.elbowPosition = .5
+                            self.elbowPosition = 1.94
                             self.shoulderPosition = .5
+                            self.manipulatorPosition = 8.2
                             flag = 2
                             dropTime = time.time()
 
                         #Home Position (Y)
-                        elif(joystick.get_button(3)):
-                            pass
-
-
-                        print(joy2_righttrigger)
+                        elif(joystick.get_button(3) and flag == 0):
+                            flag = 3
+                            self.basePosition = 5.625
+                            homeTime = time.time()
 
                         if(joy2_righttrigger > .15):
 			    self.speedMod = 2.0
  		        else:
 			    self.speedMod = 1.0
-
-		        self.rightMotor = (-joy2_right * self.speedMod)/(sensmotor)
-		        self.leftMotor = (-joy2_left * self.speedMod)/(sensmotor)
+                       
+                        #Turn left
+                        if(joystick2.get_button(4)):
+                            self.leftMotor = -.2
+                            self.rightMotor = .2
+                        #Turn right  
+                        elif(joystick2.get_button(5)):
+                            self.leftMotor  = .2
+                            self.rightMotor = -.2
+ 
+                        else:
+		            self.rightMotor = (-joy2_right * self.speedMod)/(sensmotor)
+		            self.leftMotor = (-joy2_left * self.speedMod)/(sensmotor)
 		    
+
 		        if (abs(self.elbowPosition) > 10):
 		            self.elbowPosition = 10
 		                
@@ -182,17 +193,21 @@ class xbox(QtCore.QThread):
                        
                         #Drop position (X)
                         if(flag == 2 and time.time() - dropTime > 10):
-                            self.basePosition = 9.375
+                            self.basePosition = 9.25
                             flag = 0
 
                         #Home Position (Y)
-                        elif(joystick.get_button(3)):
-                            pass
+                        elif(flag == 3 and time.time() - homeTime > 10):
+                            self.elbowPosition = 1.94
+                            self.shoulderPosition = 4.32
+                            self.manipulatorPosition = 5.3
+                            flag = 0
+
 
 
 
 		    # Limit to 16 frames per second
-		    time.sleep(.5)
+		    time.sleep(.125)
 		
                     
 		    #clock.tick(16)
