@@ -21,24 +21,30 @@ class customServer(QtCore.QThread):
 		#TODO check ip
 		hostname = "128.205.55.128"    #"128.205.54.9"
 		self.serv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		#self.serv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR)
+		self.serv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		self.serv.bind((hostname, int(port)))
 		self.serv.listen(10)
 		self.connections.append(self.serv)
 		
 	def run(self):
-		while True:
-			#print "inside the server---------------------"
-			readsock, writesock, errsock = select.select(self.connections, [], [])
-			for sock in readsock:
-				if sock == self.serv:
-					(clientsocket, address) = self.serv.accept()
-					self.connections.append(clientsocket)
-					self.client = client.client(clientsocket)
-					self.addr = address
-					self.receive()				
-				else:
-					self.receive()
+		try:
+			while True:
+				#print "inside the server---------------------"
+				readsock, writesock, errsock = select.select(self.connections, [], [])
+				for sock in readsock:
+					if sock == self.serv:
+						(clientsocket, address) = self.serv.accept()
+						self.connections.append(clientsocket)
+						self.client = client.client(clientsocket)
+						self.addr = address
+						self.receive()				
+					else:
+						self.receive()
+		except Exception, e:
+			rospy.logerr(e)
+			self.connections.remove(self.client.sock)
+			self.client = None
+
 	#method moved to main code
 	def send(self, data, host, port):
 		self.client = client.client()
@@ -46,6 +52,9 @@ class customServer(QtCore.QThread):
 		self.client.send(data)
 
 	def receive(self):
+		if self.client is None:
+			rospy.logerr('client connection not present')
+			return
 		someString =  self.client.receive()
 		self.emit(self.signal, someString)
 		sys.stdout.flush()

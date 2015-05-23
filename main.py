@@ -13,14 +13,13 @@ import re
 import globals
 import cv2
 import urllib
-import Image
-from PIL import Image
-import PIL.Image
 import numpy as np
 from PyQt4 import QtGui, QtCore
 from cam import camThread
 from xbox import xbox
 from server import customServer
+import os
+from audioThread import audioThread
 
 roverSocket = None
 port = 9999 
@@ -31,8 +30,8 @@ def send_data(msg):
     try:
         if roverSocket is None:
             roverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            roverSocket.connect((ipAdd, port))
-            #roverSocket.connect(('166.143.225.234', 9999))
+            #roverSocket.connect((ipAdd, port))
+            roverSocket.connect(('166.143.225.234', 9999))
         msg = msg + "\n"
         totalsent = 0
         while totalsent < len(msg):
@@ -69,7 +68,7 @@ class Rover(QtGui.QMainWindow):
 	self.xbox = None
 	self.server = None
 	self.startServer()
-	self.startXbox()
+        self.startXbox()
         self.camValue = 0
         self.FPS = 15
         
@@ -258,6 +257,11 @@ class Rover(QtGui.QMainWindow):
         self.setWindowTitle('Ub - Rasc-Al')
         self.show()
         self.cam = None
+	#self.startAudio()
+
+    def startAudio(self):                      
+        self.audio = audioThread()                             
+        self.audio.start()
                             
     def onComboCamSelected(self):
         self.camValue = self.comboCameraSelect.currentIndex()     
@@ -316,13 +320,15 @@ class Rover(QtGui.QMainWindow):
             self.cam.quit()
             self.cam = None
                 
-    def startCam(self):       
-        if(self.cam==None):                       
-            self.cam = camThread(int(self.pic.winId()))                                 
-            self.cam.start()
-                        
-        elif(self.cam.isRunning()):            
-            pass
+    def startCam(self): 
+	try:      
+	        if(self.cam==None):                       
+        	    self.cam = camThread(int(self.pic.winId()))                                 
+        	    self.cam.start()                
+	        elif(self.cam.isRunning()):            
+        	    pass
+	except Exception, e:
+		print e
         
     def startXbox(self):
 	         
@@ -336,7 +342,6 @@ class Rover(QtGui.QMainWindow):
 	      
     def xboxCallBackfunc(self,sigStr):
 	send_data(sigStr)
-	#print sigStr	
 	signalArray = sigStr.split(',')
 	self.xboxLabelShoulder.setText("Shoulder: "+signalArray[1])
 	self.xboxLabelElbow.setText("Elbow: "+signalArray[0][1:])
@@ -356,10 +361,11 @@ class Rover(QtGui.QMainWindow):
 	    self.server.start() 
 
     def serverCallBackfunc(self,sigStr):
-	send_data(sigStr)
+	#send_data(sigStr)
         #print(sigStr)
+	if(sigStr == "" or sigStr is None):
+		return
         if(sigStr[0] == 'b'):
-            #print(sigStr)
 	    if(sigStr[1] == '1'):
                 self.bButton.setStyleSheet("background:green;color:black;")
             else:
@@ -376,13 +382,10 @@ class MyTextEdit(QtGui.QWidget):
         super(MyTextEdit, self).__init__(parent)                   
         #self.show()
         
-def main():
-    
+def main():    
     app = QtGui.QApplication(sys.argv)
-    ex = Rover()
-    
+    ex = Rover()    
     sys.exit(app.exec_())
-
 
 if __name__ == '__main__':
     main()    
