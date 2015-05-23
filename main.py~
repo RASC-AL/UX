@@ -23,15 +23,14 @@ from audioThread import audioThread
 
 roverSocket = None
 port = 9999 
-
+roverip = '128.205.55.128'
+#roverip = '166.143.225.234'
 def send_data(msg):
     global roverSocket
-    ipAdd = socket.gethostbyname('sbrover2.eng.buffalo.edu')
     try:
         if roverSocket is None:
             roverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            #roverSocket.connect((ipAdd, port))
-            roverSocket.connect(('166.143.225.234', 9999))
+            roverSocket.connect((roverip, port))
         msg = msg + "\n"
         totalsent = 0
         while totalsent < len(msg):
@@ -67,8 +66,8 @@ class Rover(QtGui.QMainWindow):
         self.initUI()
 	self.xbox = None
 	self.server = None
-	self.startServer()
-        #self.startXbox()
+        self.startServer()
+        self.startXbox()
         self.camValue = 0
         self.FPS = 15
         
@@ -279,9 +278,9 @@ class Rover(QtGui.QMainWindow):
         send_data('R')
 
     def onBlobClicked(self):
-        stream=urllib.urlopen('http://128.205.55.125:8080/stream?topic=/blob')
+        stream=urllib.urlopen('http://' + roverip + ':8080/stream?topic=/blob')
         bytes=''
-        i = np.zeros((height,width,3), np.uint8)
+        i = np.zeros((120,320,3), np.uint8)
         while True:
             bytes+=stream.read(10000)
             a = bytes.find('\xff\xd8')
@@ -294,13 +293,25 @@ class Rover(QtGui.QMainWindow):
             cv2.imshow('blobs',i)
             key = cv2.waitKey(30)
             if key == 27:
+                print("kill")
                 cv2.destroyWindow('blobs')
-            elif key == ord('1'):
-                stream=urllib.urlopen('http://128.205.55.125:8080/stream?topic=/blob?width=3840?height=1080')
-            elif key == ord('2'):
-                stream=urllib.urlopen('http://128.205.55.125:8080/stream?topic=/blob?width=1280?height=480')
-            elif key == ord('3'):
-                stream=urllib.urlopen('http://128.205.55.125:8080/stream?topic=/blob?width=640?height=240')
+                return
+            elif key == 49:
+                print("pressed 1")
+                stream=urllib.urlopen('http://'  + roverip + ':8080/stream?topic=/blob?width=3840?height=1080')
+                bytes=''
+                i = np.zeros((1080,3840,3), np.uint8)
+            elif key == 50:
+                print("pressed 2")
+                stream=urllib.urlopen('http://' + roverip + ':8080/stream?topic=/blob?width=1280?height=480')
+                bytes=''
+                i = np.zeros((480,1280,3), np.uint8)
+            elif key == 51:
+                print("pressed 3")
+                stream=urllib.urlopen('http://' + roverip + ':8080/stream?topic=/blob?width=640?height=240')
+                bytes=''
+                i = np.zeros((240,640,3), np.uint8)
+
 
     def setCam(self):
         #Set camera logic comes here    
@@ -320,13 +331,15 @@ class Rover(QtGui.QMainWindow):
             self.cam.quit()
             self.cam = None
                 
-    def startCam(self):       
-        if(self.cam==None):                       
-            self.cam = camThread(int(self.pic.winId()))                                 
-            self.cam.start()
-                        
-        elif(self.cam.isRunning()):            
-            pass
+    def startCam(self): 
+	try:      
+	        if(self.cam==None):                       
+        	    self.cam = camThread(int(self.pic.winId()))                                 
+        	    self.cam.start()                
+	        elif(self.cam.isRunning()):            
+        	    pass
+	except Exception, e:
+		print e
         
     def startXbox(self):
 	         
