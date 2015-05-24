@@ -1,6 +1,8 @@
 import socket
 import sys
 
+#communication: initially this class was meant for handling all the socket functions, 
+#now its just like a socket holder with the receive function
 class client:
 
     MSGLEN = 4096

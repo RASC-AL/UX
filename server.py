@@ -9,6 +9,9 @@ import gobject
 gobject.threads_init()
 import gst
 
+#communication: server code. This class holds a client object which is set to None, when we have a connection established to the rover 
+#the client holds the socket. This socket is only used for recieving data from the server. The socket meant for sending data is present 
+#in main.py
 class customServer(QtCore.QThread):
 
 	def __init__(self, port):
