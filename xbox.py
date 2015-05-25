@@ -19,8 +19,8 @@ class xbox(QtCore.QThread):
 		QtCore.QThread.__init__(self)
 		self.signal = QtCore.SIGNAL("signal")
 		print "Am inside xbox init"
-		self.elbowPosition = 1.001
-		self.shoulderPosition = 1.001
+		self.elbowPosition = 0.00
+		self.shoulderPosition = 0.00
 		self.basePosition = 5.001
 		self.manipulatorPosition = 5.001
 		self.clawState = 0;
@@ -103,8 +103,7 @@ class xbox(QtCore.QThread):
 	            
                     print(time.time() - globals.now)	    
                     if(time.time() - globals.now < 1):
-		    #if(1):
-                        if(joystick.get_button(0) ==  1):
+		        if(joystick.get_button(0) ==  1):
 		            self.clawState = 1        
 		        if(joystick.get_button(1) ==  1):
 		            self.clawState = 0
@@ -182,12 +181,21 @@ class xbox(QtCore.QThread):
 		    
 		        manipulatorSend = ((self.manipulatorPosition/10) * 1800) + 600
 		
-		        rightMotorSend = ((self.rightMotor) * 500) + 1500
-		        leftMotorSend = ((self.leftMotor) * 500) + 1500
-
-		        self.Command = "l" + str(int(round(elbowSend))) + "," + str(int(round(shoulderSend))) + "," + str(int(round(baseSend))) + "," + str(int(round(manipulatorSend))) + "," + str(int(round(self.clawState))) + "," + str(int(round(rightMotorSend))) + "," + str(int(round(leftMotorSend))) + ",";
-		        print self.Command
-		  
+		        rightMotorSend = ((self.rightMotor) * 127 + 127)
+		        leftMotorSend = ((self.leftMotor) * 127 + 127)
+                   
+                        #Change cameras using drive controller buttons
+                        if(joystick2.get_button(0)):
+                            self.Command = "C0"
+                        elif(joystick2.get_button(1)):
+                            self.Command = "C1"
+                        elif(joystick2.get_button(2)):
+                            self.Command = "C2"
+                        elif(joystick2.get_button(3)):
+			    self.Command = "C3"
+                        else:
+                            self.Command = "l" + str(int(round(elbowSend))) + "," + str(int(round(shoulderSend))) + "," + str(int(round(baseSend))) + "," + str(int(round(manipulatorSend))) + "," + str(int(round(self.clawState))) + "," + str(int(round(rightMotorSend))) + "," + str(int(round(leftMotorSend))) + ",";
+		        		  
 		        self.emit(self.signal, self.Command)
 		        self.Command = ""
                        

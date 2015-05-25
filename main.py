@@ -256,12 +256,17 @@ class Rover(QtGui.QMainWindow):
         self.setWindowTitle('Ub - Rasc-Al')
         self.show()
         self.cam = None
-	#self.startAudio()
+	self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.resetStream)
+        self.timer.start(20000)
 
-    def startAudio(self):                      
-        self.audio = audioThread()                             
-        self.audio.start()
-                            
+                               
+    def resetStream(self):
+        if(self.cam != None): # and self.cam.isRunning()):
+            print("DFGvsdfCS")
+            self.cam.quit()
+            self.cam.start()
+ 
     def onComboCamSelected(self):
         self.camValue = self.comboCameraSelect.currentIndex()     
         camstr = 'C' + str(self.camValue) + ',' + str(self.FPS) + ',480,640'
@@ -278,39 +283,40 @@ class Rover(QtGui.QMainWindow):
         send_data('R')
 
     def onBlobClicked(self):
-        stream=urllib.urlopen('http://' + roverip + ':8080/stream?topic=/blob')
-        bytes=''
-        i = np.zeros((120,320,3), np.uint8)
-        while True:
-            bytes+=stream.read(10000)
-            a = bytes.find('\xff\xd8')
-            b = bytes.find('\xff\xd9')
-            if a!=-1 and b!=-1:
-                jpg = bytes[a:b+2]
-                bytes= bytes[b+2:]
-                i = cv2.imdecode(np.fromstring(jpg, dtype=np.uint8),cv2.CV_LOAD_IMAGE_COLOR)
-            cv2.namedWindow('blobs', cv2.WINDOW_AUTOSIZE)
-            cv2.imshow('blobs',i)
-            key = cv2.waitKey(30)
-            if key == 27:
-                print("kill")
-                cv2.destroyWindow('blobs')
-                return
-            elif key == 49:
-                print("pressed 1")
-                stream=urllib.urlopen('http://'  + roverip + ':8080/stream?topic=/blob?width=3840?height=1080')
-                bytes=''
-                i = np.zeros((1080,3840,3), np.uint8)
-            elif key == 50:
-                print("pressed 2")
-                stream=urllib.urlopen('http://' + roverip + ':8080/stream?topic=/blob?width=1280?height=480')
-                bytes=''
-                i = np.zeros((480,1280,3), np.uint8)
-            elif key == 51:
-                print("pressed 3")
-                stream=urllib.urlopen('http://' + roverip + ':8080/stream?topic=/blob?width=640?height=240')
-                bytes=''
-                i = np.zeros((240,640,3), np.uint8)
+        if(self.camValue is 0 or self.camValue is 1):
+            stream=urllib.urlopen('http://' + roverip + ':8080/stream?topic=/blob')
+            bytes=''
+            i = np.zeros((120,320,3), np.uint8)
+            while True:
+                bytes+=stream.read(10000)
+                a = bytes.find('\xff\xd8')
+                b = bytes.find('\xff\xd9')
+                if a!=-1 and b!=-1:
+                    jpg = bytes[a:b+2]
+                    bytes= bytes[b+2:]
+                    i = cv2.imdecode(np.fromstring(jpg, dtype=np.uint8),cv2.CV_LOAD_IMAGE_COLOR)
+                cv2.namedWindow('blobs', cv2.WINDOW_AUTOSIZE)
+                cv2.imshow('blobs',i)
+                key = cv2.waitKey(30)
+                if key == 27:
+                    print("kill")
+                    cv2.destroyWindow('blobs')
+                    return
+                elif key == 49:
+                    print("pressed 1")
+                    stream=urllib.urlopen('http://'  + roverip + ':8080/stream?topic=/blob?width=3840?height=1080')
+                    bytes=''
+                    i = np.zeros((1080,3840,3), np.uint8)
+                elif key == 50:
+                    print("pressed 2")
+                    stream=urllib.urlopen('http://' + roverip + ':8080/stream?topic=/blob?width=1280?height=480')
+                    bytes=''
+                    i = np.zeros((480,1280,3), np.uint8)
+                elif key == 51:
+                    print("pressed 3")
+                    stream=urllib.urlopen('http://' + roverip + ':8080/stream?topic=/blob?width=640?height=240')
+                    bytes=''
+                    i = np.zeros((240,640,3), np.uint8)
 
 
     def setCam(self):
@@ -333,9 +339,9 @@ class Rover(QtGui.QMainWindow):
                 
     def startCam(self): 
 	try:      
-	        if(self.cam==None):                       
-        	    self.cam = camThread(int(self.pic.winId()))                                 
-        	    self.cam.start()                
+	        if(self.cam==None):   
+                    self.cam = camThread(int(self.pic.winId())) 
+                    self.cam.start()                
 	        elif(self.cam.isRunning()):            
         	    pass
 	except Exception, e:
@@ -352,16 +358,21 @@ class Rover(QtGui.QMainWindow):
             self.xbox.stop() 
 	      
     def xboxCallBackfunc(self,sigStr):
-	send_data(sigStr)
-	signalArray = sigStr.split(',')
-	self.xboxLabelShoulder.setText("Shoulder: "+signalArray[1])
-	self.xboxLabelElbow.setText("Elbow: "+signalArray[0][1:])
-	self.xboxLabelBase.setText("Base: "+signalArray[2])
-    	self.xboxLabelManipulator.setText("Manipulator: "+signalArray[3])
-	self.xboxLabelClawState.setText("ClawState: "+signalArray[4])
-	self.xboxLabelRightMotor.setText("RightMotor: "+signalArray[5])
-	self.xboxLabelLeftMotor.setText("LeftMotor: "+signalArray[6])	
-	
+        if sigStr[0] is 'C':
+            self.camValue = int(sigStr[1])
+            self.comboCameraSelect.setCurrentIndex(self.camValue)
+            sigStr = 'C' + str(self.camValue) + ',' + str(self.FPS) + ',480,640'
+        elif sigStr[0] is 'l':
+	    signalArray = sigStr.split(',')
+	    self.xboxLabelShoulder.setText("Shoulder: "+signalArray[1])
+	    self.xboxLabelElbow.setText("Elbow: "+signalArray[0][1:])
+	    self.xboxLabelBase.setText("Base: "+signalArray[2])
+    	    self.xboxLabelManipulator.setText("Manipulator: "+signalArray[3])
+	    self.xboxLabelClawState.setText("ClawState: "+signalArray[4])
+	    self.xboxLabelRightMotor.setText("RightMotor: "+signalArray[5])
+	    self.xboxLabelLeftMotor.setText("LeftMotor: "+signalArray[6])	
+        send_data(sigStr)	
+
     def stopXbox(self):
         self.xbox.stop()
 
@@ -372,8 +383,6 @@ class Rover(QtGui.QMainWindow):
 	    self.server.start() 
 
     def serverCallBackfunc(self,sigStr):
-	#send_data(sigStr)
-        #print(sigStr)
 	if(sigStr == "" or sigStr is None):
 		return
         if(sigStr[0] == 'b'):
@@ -387,7 +396,19 @@ class Rover(QtGui.QMainWindow):
             tokens = re.split('\s+', sigStr)
             sigStr = "Temperature: 55.8 C " + tokens[2]
             self.metaInformation.setText(sigStr)
-		
+	elif(sigStr[0] == 'd'):
+            print(sigStr)
+            dataValues = sigStr[1:].split(',')
+	    self.motorcurrent1.setText('Right Motor 1: ' + dataValues[0] + ' A')
+            self.motorcurrent2.setText('Right Motor 2: ' + dataValues[1] + ' A')
+            self.motorcurrent3.setText('Left Motor 1: ' + dataValues[2] + ' A')
+            self.motorcurrent4.setText('Left Motor 2: ' + dataValues[3] + ' A')
+            self.pitch.setText(dataValues[4] + ' Degrees')
+            self.roll.setText(dataValues[5] + ' Degrees')
+            
+
+
+
 class MyTextEdit(QtGui.QWidget):
     def __init__(self,parent):
         super(MyTextEdit, self).__init__(parent)                   
