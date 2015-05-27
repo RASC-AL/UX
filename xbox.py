@@ -4,9 +4,9 @@ import time
 import socket
 import globals
 from PyQt4 import QtCore
-import gobject
-gobject.threads_init()
-import gst
+#import gobject
+#gobject.threads_init()
+#import gst
 
 flag = 0
 
@@ -120,7 +120,7 @@ class xbox(QtCore.QThread):
                         #Drop position (X)
                         if(joystick.get_button(2) and flag == 0):
                             self.elbowPosition = 1.94
-                            self.shoulderPosition = 1.0
+                            self.shoulderPosition = 0.0
                             self.manipulatorPosition = 8.2
                             flag = 2
                             dropTime = time.time()

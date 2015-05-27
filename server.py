@@ -5,9 +5,9 @@ import sys
 import client
 
 from PyQt4 import QtCore
-import gobject
-gobject.threads_init()
-import gst
+#import gobject
+#gobject.threads_init()
+#import gst
 
 #communication: server code. This class holds a client object which is set to None, when we have a connection established to the rover 
 #the client holds the socket. This socket is only used for recieving data from the server. The socket meant for sending data is present 
