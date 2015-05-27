@@ -36,7 +36,8 @@ def send_data(msg):
     try:
         if roverSocket is None:
             roverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            roverSocket.connect((roverip, port), 1)
+            roverSocket.settimeout(1)
+            roverSocket.connect((roverip, port))
         msg = msg + "\n"
         totalsent = 0
         while totalsent < len(msg):
