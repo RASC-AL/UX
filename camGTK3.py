@@ -8,7 +8,7 @@ from PyQt4 import QtCore
 
 import gi
 gi.require_version('Gst', '1.0')
-from gi.repository import GObject, Gst, Gtk
+from gi.repository import GObject, Gst
 GObject.threads_init()
 Gst.init(None)
 
