@@ -2,9 +2,15 @@
 # -*- coding: utf-8 -*-
 
 from PyQt4 import QtCore
-import gobject
-gobject.threads_init()
-import gst
+#import gobject
+#gobject.threads_init()
+#import gst
+
+import gi
+gi.require_version('Gst', '1.0')
+from gi.repository import GObject, Gst, Gtk
+GObject.threads_init()
+Gst.init(None)
 
 class camThread(QtCore.QThread):
            
@@ -19,7 +25,7 @@ class camThread(QtCore.QThread):
 
 		#self.player = gst.parse_launch('udpsrc port=5632 caps="application/x-rtp, media=(string)video, clock-rate=(int)90000, encoding-name=(string)MP4V-ES, profile-level-id=(string)1, config=(string)000001b001000001b58913000001000000012000c48d88007d0a041e1463000001b24c61766335322e3132332e30, payload=(int)96, ssrc=(uint)298758266, clock-base=(uint)3097828288, seqnum-base=(uint)63478" ! rtpmp4vdepay ! ffdec_mpeg4 ! autovideosink udpsrc port=6112 caps="application/x-rtp,media=(string)audio, clock-rate=(int)22000, width=16, height=16, encoding-name=(string)L16, encoding-params=(string)1, channels=(int)1, channel-positions=(int)1, payload=(int)96" ! rtpL16depay ! audioconvert ! alsasink sync=false') #This is MP4V 2015
 
-		self.player = gst.parse_launch('udpsrc port=5632 blocksize=9999999 caps="application/x-rtp,payload=26,encoding-name=JPEG" ! queue ! rtpjpegdepay ! jpegdec ! xvimagesink sync=false')#This is jpeg with sync n queue 2015
+		self.player = Gst.parse_launch('udpsrc port=5632 blocksize=9999999 caps="application/x-rtp,payload=26,encoding-name=JPEG" ! queue ! rtpjpegdepay ! jpegdec ! xvimagesink sync=false')#This is jpeg with sync n queue 2015
 
                 #self.player = gst.parse_launch('udpsrc port=5632 caps="application/x-rtp,payload=26,encoding-name=THEORA" ! queue ! rtptheorapay ! theoradec ! xvimagesink sync=false')#This is jpeg with sync n queue 2015
 
@@ -39,20 +45,20 @@ class camThread(QtCore.QThread):
         if message.structure is None:
             return None
         message_name = message.structure.get_name()
-        if message_name == "prepare-xwindow-id":
+        if message_name == "prepare-xwindow-handle":
             win_id = self.windowId
             assert win_id
             imagesink = message.src
             imagesink.set_property("force-aspect-ratio", True)
-            imagesink.set_window_id(win_id) 
+            imagesink.set_window_handle(win_id) 
             return message               
 
             
     def run(self):                
-        self.player.set_state(Gst_STATE_PLAYING)
+        self.player.set_state(Gst.State.PLAYING)
                                                                                        
     def quit(self):
-        self.player.set_state(Gst_STATE_NULL)
+        self.player.set_state(Gst.State.NULL)
         
         #self.cap.release()
         

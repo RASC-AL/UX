@@ -115,12 +115,12 @@ class xbox(QtCore.QThread):
 		        
 		        self.shoulderPosition += joy1_left/(-senbigact) #Y
 		    
-		        self.basePosition += (joy1_lefttrigger-joy1_righttrigger)/(senservo) #
+		        self.basePosition += (joy1_lefttrigger-joy1_righttrigger)/(senservo * 2) 
                         
                         #Drop position (X)
                         if(joystick.get_button(2) and flag == 0):
                             self.elbowPosition = 1.94
-                            self.shoulderPosition = .5
+                            self.shoulderPosition = 1.0
                             self.manipulatorPosition = 8.2
                             flag = 2
                             dropTime = time.time()
@@ -205,9 +205,9 @@ class xbox(QtCore.QThread):
                             flag = 0
 
                         #Home Position (Y)
-                        elif(flag == 3 and time.time() - homeTime > 10):
+                        elif(flag == 3 and time.time() - homeTime > 5):
                             self.elbowPosition = 1.94
-                            self.shoulderPosition = 2.00
+                            self.shoulderPosition = 3.50
                             self.manipulatorPosition = 5.3
                             flag = 0
 

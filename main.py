@@ -23,8 +23,8 @@ from audioThread import audioThread
 
 roverSocket = None
 port = 9999 
-roverip = '128.205.55.125'
-#roverip = '166.143.225.234'
+#roverip = '128.205.55.125'
+roverip = '166.143.225.234'
 
 #communication: mothod for sending data across to rover. This socket is only meant for sending data to the rover 
 #roverSocket is None when connections isn't present and it is set to the socket when connection is established
@@ -127,40 +127,40 @@ class Rover(QtGui.QMainWindow):
 	self.metaInformation.setStyleSheet("background:white;color:black;")
         self.metaInformation.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
 	
-        self.motorcurrent1=QtGui.QLabel('Motor Current 1: 1.2 mA',self)
+        self.motorcurrent1=QtGui.QLabel('Motor Current 1',self)
         self.motorcurrent1.setGeometry(910, 730, 300, 30)
         self.motorcurrent1.setStyleSheet("background:white;color:black;")
         self.motorcurrent1.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
 
-        self.motorcurrent2=QtGui.QLabel('Motor Current 2: 1.3 mA',self)
+        self.motorcurrent2=QtGui.QLabel('Motor Current 2',self)
         self.motorcurrent2.setGeometry(910, 770, 300, 30)
         self.motorcurrent2.setStyleSheet("background:white;color:black;")
         self.motorcurrent2.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
 
-        self.motorcurrent3=QtGui.QLabel('Motor Current 3: 1.3 mA',self)
+        self.motorcurrent3=QtGui.QLabel('Motor Current 3',self)
         self.motorcurrent3.setGeometry(910, 810, 300, 30)
         self.motorcurrent3.setStyleSheet("background:white;color:black;")
         self.motorcurrent3.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
 
-        self.motorcurrent4=QtGui.QLabel('Motor Current 4: 1.2 mA',self)
+        self.motorcurrent4=QtGui.QLabel('Motor Current 4',self)
         self.motorcurrent4.setGeometry(910, 850, 300, 30)
         self.motorcurrent4.setStyleSheet("background:white;color:black;")
         self.motorcurrent4.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
 
-        self.pitch=QtGui.QLabel('Pitch: 20.0 degrees',self)
+        self.pitch=QtGui.QLabel('Pitch',self)
         self.pitch.setGeometry(910, 890, 300, 30)
         self.pitch.setStyleSheet("background:white;color:black;")
         self.pitch.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
 
-        self.roll=QtGui.QLabel('Roll: 2.4 degrees',self)
+        self.roll=QtGui.QLabel('Roll',self)
         self.roll.setGeometry(910, 930, 300, 30)
         self.roll.setStyleSheet("background:white;color:black;")
         self.roll.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
 
-        self.angle=QtGui.QLabel('Angle: 11.7 degrees',self)
-        self.angle.setGeometry(910, 970, 300, 30)
-        self.angle.setStyleSheet("background:white;color:black;")
-        self.angle.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+#        self.angle=QtGui.QLabel('Angle',self)
+#        self.angle.setGeometry(910, 970, 300, 30)
+#        self.angle.setStyleSheet("background:white;color:black;")
+#        self.angle.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
 
         #self.roverTemp=QtGui.QLabel('Rover Temp: ',self)
         #self.roverTemp.setGeometry(910, 1010, 300, 30)
@@ -408,8 +408,8 @@ class Rover(QtGui.QMainWindow):
             self.motorcurrent2.setText('Right Motor 2: ' + dataValues[1] + ' A')
             self.motorcurrent3.setText('Left Motor 1: ' + dataValues[2] + ' A')
             self.motorcurrent4.setText('Left Motor 2: ' + dataValues[3] + ' A')
-            self.pitch.setText(dataValues[4] + ' Degrees')
-            self.roll.setText(dataValues[5] + ' Degrees')
+            self.pitch.setText('Pitch: ' + dataValues[4] + ' Degrees')
+            self.roll.setText('ROll: ' + dataValues[5] + ' Degrees')
             
 
 
