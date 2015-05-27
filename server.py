@@ -23,7 +23,7 @@ class customServer(QtCore.QThread):
 		self.port = port
 		#TODO check ip
 		hostname = "128.205.55.128"    #"128.205.54.9"
-		self.serv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		self.serv = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		self.serv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		self.serv.bind((hostname, int(port)))
 		self.serv.listen(10)
@@ -36,11 +36,11 @@ class customServer(QtCore.QThread):
 				readsock, writesock, errsock = select.select(self.connections, [], [])
 				for sock in readsock:
 					if sock == self.serv:
-						(clientsocket, address) = self.serv.accept()
-						self.connections.append(clientsocket)
-						self.client = client.client(clientsocket)
-						self.addr = address
-						self.receive()				
+						#(clientsocket, address) = self.serv.accept()
+						#self.connections.append(clientsocket)
+						#self.client = client.client(clientsocket)
+						#self.addr = address
+						sock.receive()				
 					else:
 						self.receive()
 		except Exception, e:
@@ -55,10 +55,10 @@ class customServer(QtCore.QThread):
 		self.client.send(data)
 
 	def receive(self):
-		if self.client is None:
-			rospy.logerr('client connection not present')
-			return
-		someString =  self.client.receive()
+		#if self.client is None:
+			#rospy.logerr('client connection not present')
+			#return
+		someString =  self.serv.receive()
 		self.emit(self.signal, someString)
 		sys.stdout.flush()
 
