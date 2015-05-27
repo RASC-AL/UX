@@ -16,10 +16,11 @@ import urllib
 import numpy as np
 from PyQt4 import QtGui, QtCore
 from cam import camThread
+#from camGTK3 import camThread
 from xbox import xbox
 from server import customServer
 import os
-from audioThread import audioThread
+
 
 roverSocket = None
 port = 9999 
@@ -35,7 +36,7 @@ def send_data(msg):
     try:
         if roverSocket is None:
             roverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            roverSocket.connect((roverip, port))
+            roverSocket.connect((roverip, port), 1)
         msg = msg + "\n"
         totalsent = 0
         while totalsent < len(msg):
