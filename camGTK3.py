@@ -56,6 +56,7 @@ class camThread(QtCore.QThread):
             pass
         print("SEGMENTATION FAULT")
         self = camThread.INSTANCE
+        self.gstInitialization()     
 
     def run(self):                
         self.player.set_state(Gst.State.PLAYING)
@@ -64,8 +65,11 @@ class camThread(QtCore.QThread):
         self.player.set_state(Gst.State.NULL)
         
         #self.cap.release()
-        
-            
-            
-        
-        
+    def gstInitialization(self):
+        self.player = gst.parse_launch('udpsrc port=5632 caps="application/x-rtp,payload=26,encoding-name=JPEG" ! queue ! rtpjpegdepay ! jpegdec ! xvimagesink sync=false')
+        self.bus = self.player.get_bus()
+        self.bus.add_signal_watch()
+        self.bus.enable_sync_message_emission()
+        self.bus.connect("sync-message::element", self.on_sync_message)
+        self.bus.connect("sync-message::error", self.handle_segfault)
+ 

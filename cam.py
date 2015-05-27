@@ -6,9 +6,6 @@ import gobject
 gobject.threads_init()
 import gst
 
-
-
-
 class camThread(QtCore.QThread):
     INSTANCE = None
 
