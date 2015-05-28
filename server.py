@@ -24,9 +24,9 @@ class customServer(QtCore.QThread):
 		#TODO check ip
 		hostname = "128.205.55.128"    #"128.205.54.9"
 		self.serv = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		self.serv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		#self.serv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		self.serv.bind((hostname, int(port)))
-		self.serv.listen(10)
+		#self.serv.listen(10)
 		self.connections.append(self.serv)
 		
 	def run(self):
@@ -40,13 +40,16 @@ class customServer(QtCore.QThread):
 						#self.connections.append(clientsocket)
 						#self.client = client.client(clientsocket)
 						#self.addr = address
-						sock.receive()				
+						#print 'receiving data'
+						self.receive()				
 					else:
+						#print 'receiving data here'
 						self.receive()
 		except Exception, e:
-			rospy.logerr(e)
-			self.connections.remove(self.client.sock)
-			self.client = None
+			#rospy.logerr(e)
+			#self.connections.remove(self.client.sock)
+			#self.client = None
+			print e
 
 	#method moved to main code
 	def send(self, data, host, port):
@@ -58,7 +61,19 @@ class customServer(QtCore.QThread):
 		#if self.client is None:
 			#rospy.logerr('client connection not present')
 			#return
-		someString =  self.serv.receive()
+		#chunks = []
+		#bytes_recd = 0
+		#while bytes_recd < 4096:
+		chunk, addr = self.serv.recvfrom(2048)
+			#print 'received message : ' + str(chunk) + ' from ' + str(addr)
+		#if chunk == '':
+		#	break
+		#chunks.append(chunk)
+		#bytes_recd = bytes_recd + len(chunk)
+		#if "\n" in chunk:
+	        #        break
+	        someString = str(chunk)
+		#print 'Message received : ' + someString
 		self.emit(self.signal, someString)
 		sys.stdout.flush()
 

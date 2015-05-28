@@ -16,15 +16,16 @@ import urllib
 import numpy as np
 from PyQt4 import QtGui, QtCore
 from cam import camThread
+#from camGTK3 import camThread
 from xbox import xbox
 from server import customServer
 import os
-from audioThread import audioThread
+
 
 roverSocket = None
 port = 9999 
-#roverip = '128.205.55.125'
-roverip = '166.143.225.234'
+roverip = '128.205.55.125'
+#roverip = '166.143.225.234'
 
 #communication: mothod for sending data across to rover. This socket is only meant for sending data to the rover 
 #roverSocket is None when connections isn't present and it is set to the socket when connection is established
@@ -35,6 +36,7 @@ def send_data(msg):
     try:
         if roverSocket is None:
             roverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            roverSocket.settimeout(1)
             roverSocket.connect((roverip, port))
         msg = msg + "\n"
         totalsent = 0
@@ -72,7 +74,7 @@ class Rover(QtGui.QMainWindow):
 	self.xbox = None
 	self.server = None
         self.startServer()
-        self.startXbox()
+        #self.startXbox()
         self.camValue = 0
         self.FPS = 15
         
@@ -426,3 +428,4 @@ def main():
 
 if __name__ == '__main__':
     main()    
+

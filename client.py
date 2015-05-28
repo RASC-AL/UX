@@ -29,7 +29,8 @@ class client:
         bytes_recd = 0
         while bytes_recd < self.MSGLEN:
             #chunk = self.sock.recv(min(self.MSGLEN - bytes_recd, 2048))
-	    chunk = self.sock.recvfrom(2048)
+	    chunk, addr = self.sock.recvfrom(2048)
+	    print 'received message : ' + chunk + ' from ' + addr
             if chunk == '':
                 break
             chunks.append(chunk)
