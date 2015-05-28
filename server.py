@@ -5,9 +5,9 @@ import sys
 import client
 
 from PyQt4 import QtCore
-#import gobject
-#gobject.threads_init()
-#import gst
+import gobject
+gobject.threads_init()
+import gst
 
 #communication: server code. This class holds a client object which is set to None, when we have a connection established to the rover 
 #the client holds the socket. This socket is only used for recieving data from the server. The socket meant for sending data is present 
@@ -23,10 +23,10 @@ class customServer(QtCore.QThread):
 		self.port = port
 		#TODO check ip
 		hostname = "128.205.55.128"    #"128.205.54.9"
-		self.serv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.serv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		self.serv = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		#self.serv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		self.serv.bind((hostname, int(port)))
-		self.serv.listen(10)
+		#self.serv.listen(10)
 		self.connections.append(self.serv)
 		
 	def run(self):
@@ -36,17 +36,20 @@ class customServer(QtCore.QThread):
 				readsock, writesock, errsock = select.select(self.connections, [], [])
 				for sock in readsock:
 					if sock == self.serv:
-						(clientsocket, address) = self.serv.accept()
-						self.connections.append(clientsocket)
-						self.client = client.client(clientsocket)
-						self.addr = address
+						#(clientsocket, address) = self.serv.accept()
+						#self.connections.append(clientsocket)
+						#self.client = client.client(clientsocket)
+						#self.addr = address
+						#print 'receiving data'
 						self.receive()				
 					else:
+						#print 'receiving data here'
 						self.receive()
 		except Exception, e:
-			rospy.logerr(e)
-			self.connections.remove(self.client.sock)
-			self.client = None
+			#rospy.logerr(e)
+			#self.connections.remove(self.client.sock)
+			#self.client = None
+			print e
 
 	#method moved to main code
 	def send(self, data, host, port):
@@ -55,10 +58,22 @@ class customServer(QtCore.QThread):
 		self.client.send(data)
 
 	def receive(self):
-		if self.client is None:
-			rospy.logerr('client connection not present')
-			return
-		someString =  self.client.receive()
+		#if self.client is None:
+			#rospy.logerr('client connection not present')
+			#return
+		#chunks = []
+		#bytes_recd = 0
+		#while bytes_recd < 4096:
+		chunk, addr = self.serv.recvfrom(2048)
+			#print 'received message : ' + str(chunk) + ' from ' + str(addr)
+		#if chunk == '':
+		#	break
+		#chunks.append(chunk)
+		#bytes_recd = bytes_recd + len(chunk)
+		#if "\n" in chunk:
+	        #        break
+	        someString = str(chunk)
+		#print 'Message received : ' + someString
 		self.emit(self.signal, someString)
 		sys.stdout.flush()
 
