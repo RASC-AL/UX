@@ -22,6 +22,9 @@ from server import customServer
 import os
 
 
+from common import *
+
+
 roverSocket = None
 port = 9999 
 #roverip = '128.205.55.125'
@@ -32,13 +35,13 @@ roverip = '166.143.225.234'
 #The socket used for receiving data is in server.py. The sockets are kept separate because the rover has 2 different nodes for
 #receiving and sending data.
 def send_data(msg):
+	msg = pad(msg)
     global roverSocket
     try:
         if roverSocket is None:
             roverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             roverSocket.settimeout(1)
             roverSocket.connect((roverip, port))
-        msg = msg + "\n"
         totalsent = 0
         while totalsent < len(msg):
             sent = roverSocket.send(msg[totalsent:])
