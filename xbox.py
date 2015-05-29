@@ -57,7 +57,7 @@ class xbox(QtCore.QThread):
 		self.done = true
 		pygame.quit ()
 	def run(self):
-                global dropTime, homeTime, flag
+                global dropTime, homeTime, clawTime, flag
 		# -------- Main Program Loop -----------
 		while self.done==False:
 		    print "Am inside xbox main loop"
