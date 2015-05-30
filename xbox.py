@@ -104,9 +104,9 @@ class xbox(QtCore.QThread):
 	            
                     print(time.time() - globals.now)	    
                     if(time.time() - globals.now < 1):
-		        if(joystick.get_button(0) ==  1):
+		        if(joystick.get_button(0) ==  1 and flag == 0):
 		            self.clawState = 1        
-		        if(joystick.get_button(1) ==  1):
+		        if(joystick.get_button(1) ==  1 and flag == 0):
 		            self.clawState = 0
 		
 		        if(joystick.get_button( 5 )):
@@ -119,7 +119,7 @@ class xbox(QtCore.QThread):
 		        self.basePosition += (joy1_lefttrigger-joy1_righttrigger)/(senservo * 2) 
                         
                         #Drop position (X)
-                        if(joystick.get_button(2) and flag == 0):
+                        if(joystick.get_button(2)):
                             self.elbowPosition = 1.94
                             self.shoulderPosition = 0.0
                             self.manipulatorPosition = 8.2
@@ -127,7 +127,7 @@ class xbox(QtCore.QThread):
                             dropTime = time.time()
 
                         #Home Position (Y)
-                        elif(joystick.get_button(3) and flag == 0):
+                        elif(joystick.get_button(3)):
                             flag = 3
                             self.basePosition = 3.75
                             homeTime = time.time()
@@ -176,7 +176,7 @@ class xbox(QtCore.QThread):
 		            self.basePosition = 0
 		  
 		        elbowSend = ((self.elbowPosition / 10) * 1000) + 1000
-		        shoulderSend = ((self.shoulderPosition / 10) * 1000) + 1000
+		        shoulderSend = ((self.shoulderPosition / 10) * 650) + 1000
 		    
 		        baseSend = ((self.basePosition/10) * 800) + 1100
 		    
@@ -201,17 +201,17 @@ class xbox(QtCore.QThread):
 		        self.Command = ""
                        
                         #Drop position (X)
-                        if(flag == 2 and time.time() - dropTime > 10):
+                        if(flag == 2 and time.time() - dropTime > 12):
                             self.basePosition = 7.80
                             clawTime = time.time()
                             flag = 4
-                        '''
-			elif(flag == 4 and time.time() - clawTime > 5):
+                        
+			if(flag == 4 and time.time() - clawTime > 5):
 			    self.clawState = 1
 			    flag = 0
-			'''
+			
                         #Home Position (Y)
-                        elif(flag == 3 and time.time() - homeTime > 5):
+                        if(flag == 3 and (time.time() - homeTime) > 5):
                             self.elbowPosition = 1.94
                             self.shoulderPosition = 3.50
                             self.manipulatorPosition = 5.3
