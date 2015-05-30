@@ -27,15 +27,15 @@ from common import *
 
 roverSocket = None
 port = 9999 
-#roverip = '128.205.55.125'
-roverip = '166.143.225.234'
+roverip = '128.205.55.125'
+#roverip = '166.143.225.234'
 
 #communication: mothod for sending data across to rover. This socket is only meant for sending data to the rover 
 #roverSocket is None when connections isn't present and it is set to the socket when connection is established
 #The socket used for receiving data is in server.py. The sockets are kept separate because the rover has 2 different nodes for
 #receiving and sending data.
 def send_data(msg):
-	msg = pad(msg)
+    msg = pad(msg)
     global roverSocket
     try:
         if roverSocket is None:
