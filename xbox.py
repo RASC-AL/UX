@@ -12,6 +12,7 @@ flag = 0
 
 dropTime = 0
 homeTime = 0
+clawTime = 0
 
 class xbox(QtCore.QThread):
 	
@@ -56,7 +57,7 @@ class xbox(QtCore.QThread):
 		self.done = true
 		pygame.quit ()
 	def run(self):
-                global dropTime, homeTime, flag
+                global dropTime, homeTime, clawTime, flag
 		# -------- Main Program Loop -----------
 		while self.done==False:
 		    print "Am inside xbox main loop"
@@ -202,8 +203,13 @@ class xbox(QtCore.QThread):
                         #Drop position (X)
                         if(flag == 2 and time.time() - dropTime > 10):
                             self.basePosition = 7.80
-                            flag = 0
-
+                            clawTime = time.time()
+                            flag = 4
+                        '''
+			elif(flag == 4 and time.time() - clawTime > 5):
+			    self.clawState = 1
+			    flag = 0
+			'''
                         #Home Position (Y)
                         elif(flag == 3 and time.time() - homeTime > 5):
                             self.elbowPosition = 1.94
