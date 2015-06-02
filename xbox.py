@@ -19,7 +19,7 @@ class xbox(QtCore.QThread):
 	def __init__(self):
 		QtCore.QThread.__init__(self)
 		self.signal = QtCore.SIGNAL("signal")
-		print "Am inside xbox init"
+		#print "Am inside xbox init"
 		self.elbowPosition = 0.00
 		self.shoulderPosition = 0.00
 		self.basePosition = 5.001
@@ -60,7 +60,7 @@ class xbox(QtCore.QThread):
                 global dropTime, homeTime, clawTime, flag
 		# -------- Main Program Loop -----------
 		while self.done==False:
-		    print "Am inside xbox main loop"
+		    #print "Am inside xbox main loop"
 		    # EVENT PROCESSING STEP
 		    for event in pygame.event.get(): # User did something
 		        if event.type == pygame.QUIT: # If user clicked close
@@ -102,7 +102,7 @@ class xbox(QtCore.QThread):
 
                     sensmotor = 4 * (self.instructionsPerSec / 16)
 	            
-                    print(time.time() - globals.now)	    
+                    #print(time.time() - globals.now)	    
                     if(time.time() - globals.now < 1):
 		        if(joystick.get_button(0) ==  1 and flag == 0):
 		            self.clawState = 1        
