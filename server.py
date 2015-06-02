@@ -64,7 +64,7 @@ class customServer(QtCore.QThread):
 		#chunks = []
 		#bytes_recd = 0
 		#while bytes_recd < 4096:
-		chunk, addr = self.serv.recvfrom(2048)
+		chunk, addr = self.serv.recvfrom(64)
 			#print 'received message : ' + str(chunk) + ' from ' + str(addr)
 		#if chunk == '':
 		#	break

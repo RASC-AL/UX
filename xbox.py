@@ -122,6 +122,7 @@ class xbox(QtCore.QThread):
                         if(joystick.get_button(2)):
                             self.elbowPosition = 1.94
                             self.shoulderPosition = 0.0
+                            time.sleep(5)
                             self.manipulatorPosition = 8.2
                             flag = 2
                             dropTime = time.time()
@@ -136,6 +137,11 @@ class xbox(QtCore.QThread):
 			    self.speedMod = 2.0
  		        else:
 			    self.speedMod = 1.0
+
+                        #Reset Button (LB)
+                        if(joystick.get_button(4)):
+                            self.shoulderPosition = 0.0
+                            self.clawState = 0
                        
                         #Turn left
                         if(joystick2.get_button(4)):
@@ -218,7 +224,7 @@ class xbox(QtCore.QThread):
                             flag = 0
 
 		    # Limit to 16 frames per second
-		    time.sleep(.125)
+		    time.sleep(.25)
                     
 		    #clock.tick(16)
 		    #self.clear()

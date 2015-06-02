@@ -27,8 +27,8 @@ from common import *
 
 roverSocket = None
 port = 9999 
-roverip = '128.205.55.125'
-#roverip = '166.143.225.234'
+#roverip = '128.205.55.125'
+roverip = '166.143.225.234'
 
 #communication: mothod for sending data across to rover. This socket is only meant for sending data to the rover 
 #roverSocket is None when connections isn't present and it is set to the socket when connection is established
