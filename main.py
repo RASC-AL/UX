@@ -406,7 +406,7 @@ class Rover(QtGui.QMainWindow):
             self.xboxLabelClawState.setText("ClawState: "+signalArray[4])
             self.xboxLabelRightMotor.setText("RightMotor: "+signalArray[5])
             self.xboxLabelLeftMotor.setText("LeftMotor: "+signalArray[6])    
-            send_data(sigStr)    
+        send_data(sigStr)    
 
     def stopXbox(self):
         self.xbox.stop()
