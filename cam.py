@@ -56,6 +56,11 @@ class camThread(QtCore.QThread):
                                                                                 
     def quit(self):
         self.player.set_state(gst.STATE_NULL)
+        if self.player:
+            del self.player
+        if self.bus:
+            del self.bus
+        self.gstInitialization()
         
         #self.cap.release()
         
@@ -70,7 +75,4 @@ class camThread(QtCore.QThread):
         self.bus.enable_sync_message_emission()
         self.bus.connect("sync-message::element", self.on_sync_message)
         self.bus.connect("sync-message::error", self.handle_segfault)
-        
-    
-        
-        
+
