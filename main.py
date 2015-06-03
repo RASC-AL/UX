@@ -396,7 +396,7 @@ class Rover(QtGui.QMainWindow):
         if sigStr[0] is 'C':
             self.camValue = int(sigStr[1])
             self.comboCameraSelect.setCurrentIndex(self.camValue)
-            sigStr = 'C' + str(self.camValue) + ',' + str(self.FPS) + ',480,640'
+            sigStr = 'C' + str(self.camValue) + ',' + str(self.FPS) + ',480,640,' + str(self.blobUpdateRate)
         elif sigStr[0] is 'l':
             signalArray = sigStr.split(',')
             self.xboxLabelShoulder.setText("Shoulder: "+signalArray[1])
@@ -426,6 +426,7 @@ class Rover(QtGui.QMainWindow):
             else:
                 self.bButton.setStyleSheet("background:white;color:black;")
         elif(sigStr[0] == 'T'):
+            #print sigStr
             globals.now = time.time()
             tokens = re.split('\s+', sigStr)
             sigStr = "Temperature: 55.8 C " + tokens[2]
