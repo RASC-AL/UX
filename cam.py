@@ -50,6 +50,7 @@ class camThread(QtCore.QThread):
             pass
         print("SEGMENTATION FAULT")
         self = camThread.INSTANCE
+        self.gstInitialization()
         
     def run(self):                
         self.player.set_state(gst.STATE_PLAYING)
