@@ -103,7 +103,7 @@ class xbox(QtCore.QThread):
                     sensmotor = 4 * (self.instructionsPerSec / 16)
 	            
                     #print(time.time() - globals.now)	    
-                    if(time.time() - globals.now < 1):
+                    if(time.time() - globals.now < 2):
 		        if(joystick.get_button(0) ==  1 and flag == 0):
 		            self.clawState = 1        
 		        if(joystick.get_button(1) ==  1 and flag == 0):
@@ -122,7 +122,7 @@ class xbox(QtCore.QThread):
                         if(joystick.get_button(2)):
                             self.elbowPosition = 1.94
                             self.shoulderPosition = 0.0
-                            time.sleep(5)
+                            #time.sleep(5)
                             self.manipulatorPosition = 8.2
                             flag = 2
                             dropTime = time.time()
