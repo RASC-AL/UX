@@ -5,9 +5,6 @@ import socket
 import globals
 from PyQt4 import QtCore
 import math
-#import gobject
-#gobject.threads_init()
-#import gst
 
 flag = 0
 
@@ -60,9 +57,11 @@ class xbox(QtCore.QThread):
 
 		# Initialize the joysticks
 		pygame.joystick.init()
+
 	def stop(self):
 		self.done = true
 		pygame.quit ()
+
 	def run(self):
                 global dropTime, homeTime, clawTime, flag
 
@@ -75,7 +74,6 @@ class xbox(QtCore.QThread):
                                                                                                 
 		# -------- Main Program Loop -----------
 		while self.done==False:
-		    #print "Am inside xbox main loop"
 		    # EVENT PROCESSING STEP
 		    for event in pygame.event.get(): # User did something
 		        if event.type == pygame.QUIT: # If user clicked close
@@ -166,18 +164,6 @@ class xbox(QtCore.QThread):
                         else:
 		            self.rightMotor = (-joy_drive_right * self.speedMod)/(sensmotor)
 		            self.leftMotor = (-joy_drive_left * self.speedMod)/(sensmotor)
-		    
-                        jointValues = self.getJoints(x, y, z);
-		       
-		        #TODO 
-		        if(jointValues):
-		            elbowSend = ((self.elbowPosition / 10) * 1000) + 1000
-		            shoulderSend = ((self.shoulderPosition / 10) * 650) + 1000
-		            baseSend = ((self.basePosition/10) * 800) + 1100
-		            manipulatorSend = ((self.manipulatorPosition/10) * 1800) + 600
-		
-		            rightMotorSend = ((self.rightMotor) * 127 + 127)
-		            leftMotorSend = ((self.leftMotor) * 127 + 127)
                    
                         #Change cameras using drive controller buttons
                         if(joystick_drive.get_button(0)):
@@ -189,9 +175,21 @@ class xbox(QtCore.QThread):
                         elif(joystick_drive.get_button(3)):
 			    self.Command = "C3"
                         else:
-                            self.Command = "l" + str(int(round(elbowSend))) + "," + str(int(round(shoulderSend))) + "," + str(int(round(baseSend))) + "," + str(int(round(manipulatorSend))) + "," + str(int(round(self.clawState))) + "," + str(int(round(rightMotorSend))) + "," + str(int(round(leftMotorSend))) + ",";
+                            jointValues = self.getJoints(x, y, z)
+
+                            if(jointValues):
+                                baseSend = jointValues[0]
+    	                        shoulderSend = jointValues[1]
+		                elbowSend = jointValues[2]
+                                #TODO How to handle manipulator?
+		                manipulatorSend = 1000 #((self.manipulatorPosition/10) * 1800) + 600
+		                rightMotorSend = ((self.rightMotor) * 127 + 127)
+		                leftMotorSend = ((self.leftMotor) * 127 + 127)
+                                self.Command = "l" + str(int(round(elbowSend))) + "," + str(int(round(shoulderSend))) + "," + str(int(round(baseSend))) + "," + str(int(round(manipulatorSend))) + "," + str(int(round(self.clawState))) + "," + str(int(round(rightMotorSend))) + "," + str(int(round(leftMotorSend))) + ",";
 		        		  
-		        #TODO self.emit(self.signal, self.Command)
+		        #TODO 
+                        #if(self.Command != ""):
+                        #    self.emit(self.signal, self.Command)
 		        self.Command = ""
                        
                         #Ignore for now 
@@ -223,52 +221,58 @@ class xbox(QtCore.QThread):
 		# on exit if running from IDLE.
 
         def getJoints(self, x, y, z):
-            link1 = 5 # First link length
-            link2 = 5 # Second link length
+            link1 = 11.5 * .0254 # First link length in meters
+            link2 = 12.5 * .0254 # Second link length in meters
             
             #Try block will prevent arm taking on any unreachable values
             try:
-                #To find the angle Theta0 (t0)
-                t0 = math.atan2(y, x)
+                #To find the angle of the base
+                base_angle = math.atan2(y, x)
     
-                #To find the angle Theta2
-
+                #To find the angle of the elbow
                 #Parameters
                 k = 2 * z * link2
-                l = 2 * x * link2 / math.cos(t0)
-                m = link1 * link1 - z * z - link2 * link2 - x * x / (math.cos(t0) * math.cos(t0));
+                l = 2 * x * link2 / math.cos(base_angle)
+                m = link1 * link1 - z * z - link2 * link2 - x * x / (math.cos(base_angle) * math.cos(base_angle));
 
-                t2 = 2 * math.atan2(-k + math.sqrt(k * k - m * m + l * l), m - l);
+                elbow_angle = 2 * math.atan2(-k + math.sqrt(k * k - m * m + l * l), m - l);
                             
-                #To find the angle Theta1
-                t1 = math.atan2(z - link2 * math.sin(t2), x / math.cos(t0) - link2 * math.cos(t2));
+                #To find the angle of the shoulder
+                shoulder_angle = math.atan2(z - link2 * math.sin(elbow_angle), x / math.cos(base_angle) - link2 * math.cos(elbow_angle));
 
                 #Convert the angles from radians to degree
 
-                t0 = t0*180/math.pi;
-                t1 = t1*180/math.pi;
-                t2 = 360-t2*180/math.pi;
+                base_angle = base_angle*180/math.pi;
+                shoulder_angle = shoulder_angle*180/math.pi;
+                elbow_angle = 360-elbow_angle*180/math.pi;
 
-                #TODO Need to know bounds of angles
-                #if(abs(t0 > 180) or abs(t1 > 180) or abs(t2 > 180)):       
-                #    raise ValueError
+                #TODO Need to verify values of angles at limits
+                if(base_angle < -90 or base_angle > 90 or shoulder_angle < 0 or shoulder_angle > 90 or elbow_angle < 65.2 or elbow_angle > 151.5):       
+                    raise ValueError
 
                 self.x = x
                 self.y = y 
                 self.z = z
                 
-                print "Base angle: %f" % t0
-                print "Shoulder angle: %f" % t1
-                print "Elbow Angle: %f" % t2
+                print "Base angle: %f" % base_angle
+                print "Shoulder angle: %f" % shoulder_angle
+                print "Elbow Angle: %f" % elbow_angle
 
-                #Need to convert angles to values of what is written to servos and actuators
+                print "X: %f" % self.x
+                print "Y: %f" % self.y
+                print "Z: %f" % self.z
+
+                #Convert angles to values of what is written to servos and actuators
+                base = 1100 + 800 * (base_angle + 90) / 180
+                shoulder = 1000 + 650 * shoulder_angle / 90
+                elbow = 1000 + 1000 * (elbow_angle - 65.2) / 86.3
+
+                return (base, shoulder, elbow) 
 
             except ValueError:
-                pass
+                return ()
 
-            print "X: %f" % self.x
-            print "Y: %f" % self.y
-            print "Z: %f" % self.z
+            
             
 
 if __name__ == '__main__':
