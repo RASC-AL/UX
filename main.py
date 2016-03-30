@@ -17,20 +17,17 @@ import numpy as np
 from PyQt4 import QtGui, QtCore
 from cam import camThread
 #from camGTK3 import camThread
-from xbox import xbox
+from xboxCombo import xbox
 from server import customServer
 import os
 
-
-from common import *
-
-
 roverSocket = None
 port = 9999 
-#roverip = '128.205.55.125'
-roverip = '166.143.225.234'
+roverip = '128.205.55.187'
 
-#communication: mothod for sending data across to rover. This socket is only meant for sending data to the rover 
+MSGLEN = 64
+
+#communication: method for sending data across to rover. This socket is only meant for sending data to the rover 
 #roverSocket is None when connections isn't present and it is set to the socket when connection is established
 #The socket used for receiving data is in server.py. The sockets are kept separate because the rover has 2 different nodes for
 #receiving and sending data.
@@ -65,6 +62,15 @@ def ping(self, hostname):
     else:
         return False
 
+def pad(message, length=MSGLEN):
+        assert len(message) <= length, 'Message is longer than the provided length! %d > %d' % (len(message), length)
+
+        pad_len = length - len(message)
+        tokens = [' ' for x in range(pad_len)]
+
+        return message + ''.join(tokens)
+
+
 class Rover(QtGui.QMainWindow):
 
     def __init__(self):
@@ -84,14 +90,12 @@ class Rover(QtGui.QMainWindow):
         self.blobUpdateRate = 2
         
     def initUI(self):   
-
     #Labels for the xbox values# shoulderSend,elbowSend,baseSend,manipulatorSend,clawState,rightMotorSend,leftMotorSend
         titleFont = QtGui.QFont('Times', 16, QtGui.QFont.Bold)        
 
         self.controlLabel=QtGui.QLabel('Xbox Control Values',self)
-        self.controlLabel.setGeometry(10, 650, 300, 30)
         self.controlLabel.setStyleSheet("background:#0079E4; color:white")
-        self.controlLabel.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+        self.controlLabel.setGeometry(10, 650, 300, 30)
         self.controlLabel.setFont(titleFont)
         self.xboxLabelShoulder=QtGui.QLabel('',self)
         self.xboxLabelShoulder.setGeometry(10, 690, 300, 30)
@@ -125,7 +129,6 @@ class Rover(QtGui.QMainWindow):
         self.sensorLabel=QtGui.QLabel('Rover Sensor Values',self)
         self.sensorLabel.setGeometry(910, 650, 300, 30)
         self.sensorLabel.setStyleSheet("background:#0079E4; color:white")
-        self.sensorLabel.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
         self.sensorLabel.setFont(titleFont)
 
         #Label for the temperature
@@ -164,16 +167,6 @@ class Rover(QtGui.QMainWindow):
         self.roll.setStyleSheet("background:white;color:black;")
         self.roll.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
 
-        #self.angle=QtGui.QLabel('Angle',self)
-        #self.angle.setGeometry(910, 970, 300, 30)
-        #self.angle.setStyleSheet("background:white;color:black;")
-        #self.angle.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
-
-        #self.roverTemp=QtGui.QLabel('Rover Temp: ',self)
-        #self.roverTemp.setGeometry(910, 1010, 300, 30)
-        #self.roverTemp.setStyleSheet("background:white;color:black;")
-        #self.roverTemp.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-      
         #Camera Select Label 
         self.cameraLabel=QtGui.QLabel('Cam',self)
         self.cameraLabel.setGeometry(505, 830, 90, 30)
@@ -193,25 +186,6 @@ class Rover(QtGui.QMainWindow):
 
         comboCameraSelect.activated[str].connect(self.onComboCamSelected)
         self.comboCameraSelect = comboCameraSelect
-
-
-        #Blob Rate Select Label 
-        self.blobLabel=QtGui.QLabel('Blob Rate',self)
-        self.blobLabel.setGeometry(505, 930, 90, 30)
-        self.blobLabel.setStyleSheet("background:#0079E4; color:white")
-        self.blobLabel.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
-        self.blobLabel.setFont(titleFont)
-
-        #Blob Rate Select ComboBox
-        comboBlobUpdateRateSelect = QtGui.QComboBox(self)
-        comboBlobUpdateRateSelect.setGeometry(505, 970, 90, 60)
-        for i in range(1, 11):
-            comboBlobUpdateRateSelect.addItem('%d' % (i))
-        comboBlobUpdateRateSelect.setStyleSheet("background:white;color:black;")
-
-        comboBlobUpdateRateSelect.activated[str].connect(self.onComboBlobUpdateRateSelected)
-        self.comboBlobUpdateRateSelect = comboBlobUpdateRateSelect
-
 
         #FPS Label       
         self.FPSLabel=QtGui.QLabel('FPS',self)
@@ -375,11 +349,13 @@ class Rover(QtGui.QMainWindow):
             self.cam = None
                 
     def startCam(self): 
-        try:      
+        try:
             if(self.cam==None):   
+                print "initialized"
                 self.cam = camThread(int(self.pic.winId())) 
                 self.cam.start()                
-            elif(self.cam.isRunning()):            
+            elif(self.cam.isRunning()):
+                print "running"
                 pass
         except Exception, e:
             print e
@@ -397,7 +373,7 @@ class Rover(QtGui.QMainWindow):
             self.camValue = int(sigStr[1])
             self.comboCameraSelect.setCurrentIndex(self.camValue)
             sigStr = 'C' + str(self.camValue) + ',' + str(self.FPS) + ',480,640,' + str(self.blobUpdateRate)
-        elif sigStr[0] is 'l':
+        elif sigStr[0] is 's' or sigStr[0] is 'l':
             signalArray = sigStr.split(',')
             self.xboxLabelShoulder.setText("Shoulder: "+signalArray[1])
             self.xboxLabelElbow.setText("Elbow: "+signalArray[0][1:])
@@ -429,7 +405,7 @@ class Rover(QtGui.QMainWindow):
             #print sigStr
             globals.now = time.time()
             tokens = re.split('\s+', sigStr)
-            sigStr = "Temperature: 55.8 C " + tokens[2]
+            sigStr = "Temperature: 35 C " + tokens[2]
             self.metaInformation.setText(sigStr)
         elif(sigStr[0] == 'd'):
             #print(sigStr)
@@ -439,7 +415,7 @@ class Rover(QtGui.QMainWindow):
             self.motorcurrent3.setText('Left Motor 1: ' + dataValues[2] + ' A')
             self.motorcurrent4.setText('Left Motor 2: ' + dataValues[3] + ' A')
             self.pitch.setText('Pitch: ' + dataValues[4] + ' Degrees')
-            self.roll.setText('ROll: ' + dataValues[5] + ' Degrees')
+            self.roll.setText('Roll: ' + dataValues[5] + ' Degrees')
                 
 
 
