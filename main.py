@@ -23,7 +23,7 @@ import os
 
 roverSocket = None
 port = 9999 
-roverip = '128.205.55.187'
+roverip = '128.205.55.189'
 
 MSGLEN = 64
 
@@ -275,8 +275,6 @@ class Rover(QtGui.QMainWindow):
         camstr = 'C' + str(self.camValue) + ',' + str(self.FPS) + ',480,640,' + str(self.blobUpdateRate)
         print camstr
         send_data(camstr)
-        if self.cam:
-            self.cam.quit()
 
     def onComboBlobUpdateRateSelected(self):
         self.blobUpdateRate = self.comboBlobUpdateRateSelect.currentIndex() + 1
