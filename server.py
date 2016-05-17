@@ -22,7 +22,7 @@ class customServer(QtCore.QThread):
 		self.connections = []
 		self.port = port
 		#TODO check ip
-		hostname = "128.205.55.104"    #"128.205.54.9"
+		hostname = "0.0.0.0"
 		self.serv = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		#self.serv.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		self.serv.bind((hostname, int(port)))

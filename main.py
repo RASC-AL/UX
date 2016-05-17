@@ -16,6 +16,7 @@ import urllib
 import numpy as np
 from PyQt4 import QtGui, QtCore
 from cam import camThread
+from detectionWindow import detectionWindow
 #from camGTK3 import camThread
 from xboxCombo import xbox
 from server import customServer
@@ -23,7 +24,8 @@ import os
 
 roverSocket = None
 port = 9999 
-roverip = '128.205.55.189'
+#roverip = '128.205.55.154' #Local
+roverip = '166.166.193.135' #GX440
 
 MSGLEN = 64
 
@@ -36,6 +38,7 @@ def send_data(msg):
     global roverSocket
     try:
         if roverSocket is None:
+            print "Initializing socket"
             roverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             roverSocket.settimeout(1)
             roverSocket.connect((roverip, port))
@@ -85,13 +88,30 @@ class Rover(QtGui.QMainWindow):
         self.server = None
         self.startServer()
         self.startXbox()
+        self.detectionWindow = detectionWindow(self)
         self.camValue = 0
         self.FPS = 15
         self.blobUpdateRate = 2
-        
+        self.setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.panMin = 1100
+        self.panMax = 1900
+        self.panRate = 5
+        self.tiltMin = 1100
+        self.tiltMax = 1900
+        self.tiltRate = 5
+        #Pan, Tilt, Zoom, Current Cam
+        self.ptzTracker = [[1500, 1500, 0], [1500, 1500, 0]] 
+        self.currentCam = 0
     def initUI(self):   
     #Labels for the xbox values# shoulderSend,elbowSend,baseSend,manipulatorSend,clawState,rightMotorSend,leftMotorSend
         titleFont = QtGui.QFont('Times', 16, QtGui.QFont.Bold)        
+
+        #The main Video widget    
+        pic = QtGui.QWidget(self)
+        pic.setGeometry(10, 10, 1200, 620)
+        pic.setStyleSheet("image:url(/home/sblinux/Pictures/Bulls.jpg);background:white;background-repeat:repat; ")
+        pic.setAttribute(0,1);
+        pic.setAttribute(3,1);
 
         self.controlLabel=QtGui.QLabel('Xbox Control Values',self)
         self.controlLabel.setStyleSheet("background:#0079E4; color:white")
@@ -180,8 +200,6 @@ class Rover(QtGui.QMainWindow):
         comboCameraSelect.setGeometry(505, 870, 90, 60)
         comboCameraSelect.addItem("camera0")
         comboCameraSelect.addItem("camera1")
-        comboCameraSelect.addItem("camera2")
-        comboCameraSelect.addItem("camera3")
         comboCameraSelect.setStyleSheet("background:white;color:black;")
 
         comboCameraSelect.activated[str].connect(self.onComboCamSelected)
@@ -209,13 +227,6 @@ class Rover(QtGui.QMainWindow):
         comboFPSSelect.activated[str].connect(self.onComboFPSSelected)
         self.comboFPSSelect = comboFPSSelect
 
-        #The main Video widget    
-        pic = QtGui.QWidget(self)
-        pic.setGeometry(10, 10, 1200, 620)
-        pic.setStyleSheet("image:url(/home/sblinux/Pictures/Bulls.jpg);background:white;background-repeat:repat; ")
-        pic.setAttribute(0,1);
-        pic.setAttribute(3,1);
-
         #Start button for the camera feed      
         startButton = QtGui.QPushButton("Start Cam",self)
         startButton.clicked.connect(self.startCam)
@@ -232,11 +243,11 @@ class Rover(QtGui.QMainWindow):
         resetButton.setGeometry(505,760,90,60)
         resetButton.setStyleSheet("background:white;color:black; ")
  
-        blobButton = QtGui.QPushButton("Blob", self)
-        blobButton.clicked.connect(self.onBlobClicked)
-        blobButton.setGeometry(625, 760, 90, 60)
-        blobButton.setStyleSheet("background:white;color:black; ")
-        self.bButton = blobButton
+        detectionButton = QtGui.QPushButton("Detection", self)
+        detectionButton.clicked.connect(self.onDetectionClicked)
+        detectionButton.setGeometry(625, 760, 90, 60)
+        detectionButton.setStyleSheet("background:white;color:black; ")
+        self.bButton = detectionButton
          
         QtGui.QApplication.setStyle(QtGui.QStyleFactory.create('Cleanlooks'))
         
@@ -264,7 +275,57 @@ class Rover(QtGui.QMainWindow):
         self.timer.timeout.connect(self.resetStream)
         self.timer.start(20000)
 
-                               
+    #Key controls for moving PTZ mounts
+    
+    def keyPressEvent(self, event):
+        eventOccurred = True
+        if(event.key() == QtCore.Qt.Key_Left):
+	    self.ptzTracker[self.currentCam][0] -= self.panRate
+	    if(self.ptzTracker[self.currentCam][0] < self.panMin):
+	        self.ptzTracker[self.currentCam][0] = self.panMin
+        elif(event.key() == QtCore.Qt.Key_Right):
+            self.ptzTracker[self.currentCam][0] += self.panRate
+            if(self.ptzTracker[self.currentCam][0] > self.panMax):
+                self.ptzTracker[self.currentCam][0] = self.panMax
+        elif(event.key() == QtCore.Qt.Key_Down):
+            self.ptzTracker[self.currentCam][1] -= self.tiltRate
+            if(self.ptzTracker[self.currentCam][1] < self.tiltMin):
+                self.ptzTracker[self.currentCam][1] = self.tiltMin
+        elif(event.key() == QtCore.Qt.Key_Up):
+            self.ptzTracker[self.currentCam][1] += self.tiltRate
+            if(self.ptzTracker[self.currentCam][1] > self.tiltMax):
+                self.ptzTracker[self.currentCam][1] = self.tiltMax
+        elif(event.key() == QtCore.Qt.Key_Shift):
+            self.ptzTracker[self.currentCam][2] = 1
+        elif(event.key() == QtCore.Qt.Key_Space and not event.isAutoRepeat()):
+            self.ptzTracker[self.currentCam][2] = 0
+            self.currentCam = self.currentCam ^ 1 
+        else:
+            eventOccurred = False
+        
+        if(self.ptzTracker[self.currentCam][2] == 1 and eventOccurred):
+            self.handleDigitalZoom()
+        elif(eventOccurred):
+            ptzStr = "P" + ','.join(str(x) for x in self.ptzTracker[0][0:2]) + \
+                     ',' + ','.join(str(x) for x in self.ptzTracker[1][0:2]) + \
+                     ',' + str(self.currentCam)
+            print ptzStr
+            send_data(ptzStr)
+
+    def keyReleaseEvent(self, event):
+        if(event.isAutoRepeat()):
+            return
+        eventOccurred = True
+        if(event.key() == QtCore.Qt.Key_Shift):
+            self.ptzTracker[self.currentCam][2] = 0
+            self.handleDigitalZoom()
+        else:
+            eventOccurred = False
+
+    #TODO
+    def handleDigitalZoom(self):
+        pass
+
     def resetStream(self):
         if(self.cam != None): # and self.cam.isRunning()):
             self.cam.quit()
@@ -291,6 +352,10 @@ class Rover(QtGui.QMainWindow):
     def onResetClicked(self):
         send_data('R')
 
+    def onDetectionClicked(self):
+        self.detectionWindow.showMax()
+
+    #Not currently being used
     def onBlobClicked(self):
         if(self.camValue is 0 or self.camValue is 1):
             stream=urllib.urlopen('http://' + roverip + ':8080/stream?topic=/blob')
@@ -350,7 +415,8 @@ class Rover(QtGui.QMainWindow):
         try:
             if(self.cam==None):   
                 print "initialized"
-                self.cam = camThread(int(self.pic.winId())) 
+                self.cam = camThread(int(self.pic.winId()), 
+                    int(self.detectionWindow.getWinId())) 
                 self.cam.start()                
             elif(self.cam.isRunning()):
                 print "running"
@@ -369,7 +435,15 @@ class Rover(QtGui.QMainWindow):
     def xboxCallBackfunc(self,sigStr):
         if sigStr[0] is 'C':
             self.camValue = int(sigStr[1])
-            self.comboCameraSelect.setCurrentIndex(self.camValue)
+            self.comboCameraSelect.setCurrentIndex(self.camValue - 4)
+            sigStr = 'C' + str(self.camValue) + ',' + str(self.FPS) + ',480,640,' + str(self.blobUpdateRate)
+        elif sigStr[0] is 'F':
+            modifier = -1 + int(sigStr[1]) 
+            length = self.comboFPSSelect.count()
+            index = (self.comboFPSSelect.currentIndex() + modifier) % length
+            index = length - 1 if index == -1 else index
+            self.comboFPSSelect.setCurrentIndex(index)
+            self.FPS = int(self.comboFPSSelect.currentText())
             sigStr = 'C' + str(self.camValue) + ',' + str(self.FPS) + ',480,640,' + str(self.blobUpdateRate)
         elif sigStr[0] is 's' or sigStr[0] is 'l':
             signalArray = sigStr.split(',')
@@ -415,9 +489,6 @@ class Rover(QtGui.QMainWindow):
             self.pitch.setText('Pitch: ' + dataValues[4] + ' Degrees')
             self.roll.setText('Roll: ' + dataValues[5] + ' Degrees')
                 
-
-
-
 class MyTextEdit(QtGui.QWidget):
     def __init__(self,parent):
         super(MyTextEdit, self).__init__(parent)                   

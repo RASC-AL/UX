@@ -9,11 +9,12 @@ import gst
 class camThread(QtCore.QThread):
     INSTANCE = None
 
-    def __init__(self,windowId):
+    def __init__(self,windowId,detectionWindowId):
         camThread.INSTANCE = self
         try:
             QtCore.QThread.__init__(self)    
-            self.windowId = windowId                                   
+            self.windowId = windowId             
+            self.detectionWindowId = detectionWindowId
             self.gstInitialization()
         except Exception, e:
             print(e)
@@ -30,6 +31,19 @@ class camThread(QtCore.QThread):
             imagesink.set_xwindow_id(win_id) 
             return message               
              
+    def on_sync_message_detection(self, bus, message):
+        if message.structure is None:
+            return None
+        message_name = message.structure.get_name()
+        if message_name == "prepare-xwindow-id":
+            win_id = self.detectionWindowId
+            assert win_id
+            imagesink = message.src
+            imagesink.set_property("force-aspect-ratio", True)
+            imagesink.set_xwindow_id(win_id)
+            return message
+
+
     def handle_segfault(self, bus, message):
         try:
             self.mainloop.quit()
@@ -41,13 +55,15 @@ class camThread(QtCore.QThread):
         
     def run(self):
         self.player.set_state(gst.STATE_PLAYING)
-                                                                                
+        self.detectionPlayer.set_state(gst.STATE_PLAYING)                                                                               
     def quit(self):
         self.player.set_state(gst.STATE_NULL)
+        self.detectionPlayer.set_state(gst.STATE_NULL)
         if self.player:
             del self.player
         if self.bus:
             del self.bus
+        #TODO    
         self.gstInitialization()
         
         #self.cap.release()
@@ -57,10 +73,22 @@ class camThread(QtCore.QThread):
         #self.player = gst.parse_launch('udpsrc port=5632 caps="application/x-rtp,payload=26,encoding-name=JPEG" ! queue ! rtpjpegdepay ! jpegdec ! xvimagesink sync=false udpsrc port=6112 caps="application/x-rtp,media=(string)audio, clock-rate=(int)8000, width=16, height=16, encoding-name=(string)L16, encoding-params=(string)1, channels=(int)1, channel-positions=(int)1, payload=(int)96" ! rtpL16depay ! audioconvert ! alsasink sync=false') #current 2015
        # self.player = gst.parse_launch('udpsrc port=5632 caps="application/x-rtp,payload=26,encoding-name=JPEG" ! queue ! rtpjpegdepay ! jpegdec ! xvimagesink  udpsrc port=6112 caps="application/x-rtp, media=(string)audio, clock-rate=(int)8000, encoding-name=(string)AMR, encoding-params=(string)1, octet-align=(string)1, payload=(int)96" ! rtpamrdepay ! amrnbdec ! audioconvert ! alsasink')        
 #self.player = gst.parse_launch('udpsrc port=5632 caps="application/x-rtp,payload=26,encoding-name=JPEG" ! queue ! rtpjpegdepay ! jpegdec ! xvimagesink sync=false udpsrc port=6112 caps="application/x-rtp,media=(string)audio, clock-rate=(int)22000, width=16, height=16, encoding-name=(string)L16, encoding-params=(string)1, channels=(int)1, channel-positions=(int)1, payload=(int)96" ! rtpL16depay ! audioconvert ! alsasink sync=false')
-        self.player = gst.parse_launch('udpsrc port=1234 caps="application/x-rtp, payload=127" ! rtph264depay ! ffdec_h264 ! xvimagesink sync=false')
+        #self.player = gst.parse_launch('udpsrc port=1234 caps="application/x-rtp, payload=127" ! rtph264depay ! ffdec_h264 ! xvimagesink sync=false')
+        #H264 2 Streams
+        #self.player = gst.parse_launch('udpsrc port=1234 caps="application/x-rtp, payload=127" ! rtph264depay ! ffdec_h264 ! xvimagesink sync=false udpsrc port=1235 caps="application/x-rtp, payload=127" ! rtph264depay ! ffdec_h264 ! xvimagesink sync=false')
+        #Drive stream setup
+        self.player = gst.parse_launch('udpsrc port=1234 caps="application/x-rtp, payload=127" ! gstrtpjitterbuffer ! rtpjpegdepay ! jpegdec ! xvimagesink sync=false')
         self.bus = self.player.get_bus()
         self.bus.add_signal_watch()
         self.bus.enable_sync_message_emission()
         self.bus.connect("sync-message::element", self.on_sync_message)
         self.bus.connect("sync-message::error", self.handle_segfault)
 
+        #Detection stream setup
+        self.detectionPlayer = gst.parse_launch('udpsrc port=1235 caps="application/x-rtp, payload=127, latency=0" ! gstrtpjitterbuffer ! rtpjpegdepay ! jpegdec ! xvimagesink sync=false')
+        self.detectionBus = self.detectionPlayer.get_bus()
+        self.detectionBus.add_signal_watch()
+        self.detectionBus.enable_sync_message_emission()
+        self.detectionBus.connect("sync-message::element", 
+            self.on_sync_message_detection)
+        self.detectionBus.connect("sync-message::error", self.handle_segfault)

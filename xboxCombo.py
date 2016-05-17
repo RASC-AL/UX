@@ -35,9 +35,11 @@ class xbox(QtCore.QThread):
 		self.rightMotor = 127;
 		self.leftMotor = 127;
 		
+                self.actuatorTracker = [0, 0, 0, 0, 0]
+
 		self.instructionsPerSecond = 8.0
 	        
-                self.speedMod = 1.0
+                self.speedMod = 2.0
  	
 		self.clear = lambda: os.system('cls')
 		
@@ -83,7 +85,7 @@ class xbox(QtCore.QThread):
                                 self.manipulatorPosition = self.manipulatorMin
 		        #Elbow Movement
                         elif math.fabs(joystick.get_axis(4)) > .2:
-		            elbowPosition = -joystick.get_axis(4) * 254
+		            elbowPosition = joystick.get_axis(4) * 254
 		        else:
                             elbowPosition = 0
  
@@ -101,18 +103,33 @@ class xbox(QtCore.QThread):
                             self.basePosition -= joystick.get_axis(5) / self.baseMod * 80
                             self.basePosition = self.baseMin if self.basePosition < self.baseMin else self.basePosition                          
                         
-                        if joystick2.get_axis(5) < -.5:
-			    self.speedMod = 2.0
- 		        else:
+                        if joystick2.get_axis(5) > .5:
 			    self.speedMod = 1.0
+ 		        else:
+			    self.speedMod = 2.0
 
                         #Reset Button (LB) #TODO
                         if(joystick.get_button(4)):
                             pass
-
+                       
+                        #Start of Drive Control
                         #Default values (Not Moving)
                         self.leftMotor = 127
                         self.rightMotor = 127 
+
+                        #Manual control
+                        actuatorType = self.actuatorTracker[-1]
+                        if(joystick2.get_button(6)):
+                            self.actuatorTracker[-1] = actuatorType ^ 1
+                        count = 0
+                        if(self.actuatorTracker[-1] == 1):
+                            self.actuatorTracker[0] = joystick2.get_button(11)
+                            self.actuatorTracker[1] = joystick2.get_button(14)
+                            self.actuatorTracker[2] = joystick2.get_button(13)
+                            self.actuatorTracker[3] = joystick2.get_button(12)
+                            for i in range(0, 4):
+                                count += self.actuatorTracker[i]
+
                         #Turn left
                         if joystick2.get_button(4):
                             self.leftMotor = 127 - .2 * 127
@@ -123,9 +140,11 @@ class xbox(QtCore.QThread):
                             self.rightMotor = 127 - .2 * 127
                         else:
 		            if math.fabs(joystick2.get_axis(1)) > .2:
-                                self.leftMotor = joystick2.get_axis(1) / self.speedMod * 127 + 127
+                                self.leftMotor = -joystick2.get_axis(1) / self.speedMod * 127 + 127
                             if math.fabs(joystick2.get_axis(4)) > .2:
-		                self.rightMotor = joystick2.get_axis(4) / self.speedMod * 127 + 127
+		                self.rightMotor = -joystick2.get_axis(4) / self.speedMod * 127 + 127
+                        #End of drive control
+
 
 		        if(joystick.get_button(0) ==  1):
 		            self.clawState = 1        
@@ -145,19 +164,23 @@ class xbox(QtCore.QThread):
                             self.basePosition = 1500.0
                             pos = True
                    
-                        #Change cameras using drive controller buttons
-                        if(joystick2.get_button(0)):
-                            self.Command = "C0"
+                        #Change cameras or suspension using drive controller buttons
+                        if(count > 0 or actuatorType != self.actuatorTracker[-1]):         
+                            actStr = ','.join(str(x) for x in self.actuatorTracker)
+                            rightStickStr = str((self.rightMotor - 127) * -2)
+                            self.Command = "A" + actStr + ',' + rightStickStr
+                        elif(joystick2.get_button(0)):
+                            self.Command = "C4"
                         elif(joystick2.get_button(1)):
-                            self.Command = "C1"
+                            self.Command = "C5"
                         elif(joystick2.get_button(2)):
-                            self.Command = "C2"
+                            self.Command = "F0"
                         elif(joystick2.get_button(3)):
-			    self.Command = "C3"
+                            self.Command = "F2"
                         else:
                             leadChar = 'l' if pos else 's'
-                            self.Command = leadChar + str(int(round(elbowPosition))) + "," + str(int(round(shoulderPosition))) + "," + str(int(round(self.basePosition))) + "," + str(int(round(self.manipulatorPosition))) + "," + str(int(round(self.clawState))) + "," + str(int(round(self.rightMotor))) + "," + str(int(round(self.leftMotor))) + ",";
-		        #print self.Command		  
+                            self.Command = leadChar + str(int(round(elbowPosition))) + "," + str(int(round(shoulderPosition))) + "," + str(int(round(self.basePosition))) + "," + str(int(round(self.manipulatorPosition))) + "," + str(int(round(self.clawState))) + "," + str(int(round(self.rightMotor))) + "," + str(int(round(self.leftMotor)));
+		        print self.Command		  
 		        self.emit(self.signal, self.Command)
 		        self.Command = ""
 
