@@ -63,6 +63,7 @@ background-repeat:repat;
             </property>
             <property name="font">
              <font>
+              <family>Ubuntu</family>
               <pointsize>12</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -89,6 +90,7 @@ background-repeat:repat;
             </property>
             <property name="font">
              <font>
+              <family>Ubuntu</family>
               <pointsize>12</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -113,8 +115,23 @@ background-repeat:repat;
               <verstretch>1</verstretch>
              </sizepolicy>
             </property>
+            <property name="font">
+             <font>
+              <family>Ubuntu</family>
+              <pointsize>12</pointsize>
+              <weight>75</weight>
+              <italic>false</italic>
+              <bold>true</bold>
+             </font>
+            </property>
             <property name="styleSheet">
              <string notr="true">background-color: rgb(255, 255, 255);</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -128,6 +145,7 @@ background-repeat:repat;
             </property>
             <property name="font">
              <font>
+              <family>Ubuntu</family>
               <pointsize>12</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -152,8 +170,23 @@ background-repeat:repat;
               <verstretch>1</verstretch>
              </sizepolicy>
             </property>
+            <property name="font">
+             <font>
+              <family>Ubuntu</family>
+              <pointsize>12</pointsize>
+              <weight>75</weight>
+              <italic>false</italic>
+              <bold>true</bold>
+             </font>
+            </property>
             <property name="styleSheet">
              <string notr="true">background-color: rgb(255, 255, 255);</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -167,6 +200,7 @@ background-repeat:repat;
             </property>
             <property name="font">
              <font>
+              <family>Ubuntu</family>
               <pointsize>12</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -191,8 +225,23 @@ background-repeat:repat;
               <verstretch>1</verstretch>
              </sizepolicy>
             </property>
+            <property name="font">
+             <font>
+              <family>Ubuntu</family>
+              <pointsize>12</pointsize>
+              <weight>75</weight>
+              <italic>false</italic>
+              <bold>true</bold>
+             </font>
+            </property>
             <property name="styleSheet">
              <string notr="true">background-color: rgb(255, 255, 255);</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -204,8 +253,23 @@ background-repeat:repat;
               <verstretch>1</verstretch>
              </sizepolicy>
             </property>
+            <property name="font">
+             <font>
+              <family>Ubuntu</family>
+              <pointsize>12</pointsize>
+              <weight>75</weight>
+              <italic>false</italic>
+              <bold>true</bold>
+             </font>
+            </property>
             <property name="styleSheet">
              <string notr="true">background-color: rgb(255, 255, 255);</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -217,8 +281,23 @@ background-repeat:repat;
               <verstretch>1</verstretch>
              </sizepolicy>
             </property>
+            <property name="font">
+             <font>
+              <family>Ubuntu</family>
+              <pointsize>12</pointsize>
+              <weight>75</weight>
+              <italic>false</italic>
+              <bold>true</bold>
+             </font>
+            </property>
             <property name="styleSheet">
              <string notr="true">background-color: rgb(255, 255, 255);</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -232,6 +311,7 @@ background-repeat:repat;
             </property>
             <property name="font">
              <font>
+              <family>Ubuntu</family>
               <pointsize>12</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -258,6 +338,7 @@ background-repeat:repat;
             </property>
             <property name="font">
              <font>
+              <family>Ubuntu</family>
               <pointsize>12</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -282,8 +363,23 @@ background-repeat:repat;
               <verstretch>1</verstretch>
              </sizepolicy>
             </property>
+            <property name="font">
+             <font>
+              <family>Ubuntu</family>
+              <pointsize>12</pointsize>
+              <weight>75</weight>
+              <italic>false</italic>
+              <bold>true</bold>
+             </font>
+            </property>
             <property name="styleSheet">
              <string notr="true">background-color: rgb(255, 255, 255);</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -297,6 +393,7 @@ background-repeat:repat;
             </property>
             <property name="font">
              <font>
+              <family>Ubuntu</family>
               <pointsize>12</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -321,8 +418,23 @@ background-repeat:repat;
               <verstretch>1</verstretch>
              </sizepolicy>
             </property>
+            <property name="font">
+             <font>
+              <family>Ubuntu</family>
+              <pointsize>12</pointsize>
+              <weight>75</weight>
+              <italic>false</italic>
+              <bold>true</bold>
+             </font>
+            </property>
             <property name="styleSheet">
              <string notr="true">background-color: rgb(255, 255, 255);</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -334,8 +446,23 @@ background-repeat:repat;
               <verstretch>1</verstretch>
              </sizepolicy>
             </property>
+            <property name="font">
+             <font>
+              <family>Ubuntu</family>
+              <pointsize>12</pointsize>
+              <weight>75</weight>
+              <italic>false</italic>
+              <bold>true</bold>
+             </font>
+            </property>
             <property name="styleSheet">
              <string notr="true">background-color: rgb(255, 255, 255);</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -349,6 +476,7 @@ background-repeat:repat;
             </property>
             <property name="font">
              <font>
+              <family>Ubuntu</family>
               <pointsize>12</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -402,8 +530,23 @@ background-repeat:repat;
               <verstretch>1</verstretch>
              </sizepolicy>
             </property>
+            <property name="font">
+             <font>
+              <family>Ubuntu</family>
+              <pointsize>12</pointsize>
+              <weight>75</weight>
+              <italic>false</italic>
+              <bold>true</bold>
+             </font>
+            </property>
             <property name="styleSheet">
              <string notr="true">background-color: rgb(255, 255, 255);</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -417,6 +560,7 @@ background-repeat:repat;
             </property>
             <property name="font">
              <font>
+              <family>Ubuntu</family>
               <pointsize>12</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -443,6 +587,7 @@ background-repeat:repat;
             </property>
             <property name="font">
              <font>
+              <family>Ubuntu</family>
               <pointsize>12</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -467,8 +612,23 @@ background-repeat:repat;
               <verstretch>1</verstretch>
              </sizepolicy>
             </property>
+            <property name="font">
+             <font>
+              <family>Ubuntu</family>
+              <pointsize>12</pointsize>
+              <weight>75</weight>
+              <italic>false</italic>
+              <bold>true</bold>
+             </font>
+            </property>
             <property name="styleSheet">
              <string notr="true">background-color: rgb(255, 255, 255);</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -494,10 +654,15 @@ background-repeat:repat;
             </property>
             <property name="font">
              <font>
-              <pointsize>14</pointsize>
+              <family>Ubuntu</family>
+              <pointsize>22</pointsize>
               <weight>75</weight>
+              <italic>false</italic>
               <bold>true</bold>
              </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="text">
              <string>Start Cam</string>
@@ -514,10 +679,15 @@ background-repeat:repat;
             </property>
             <property name="font">
              <font>
-              <pointsize>14</pointsize>
+              <family>Ubuntu</family>
+              <pointsize>22</pointsize>
               <weight>75</weight>
+              <italic>false</italic>
               <bold>true</bold>
              </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="text">
              <string>Stop Cam</string>
@@ -534,10 +704,15 @@ background-repeat:repat;
             </property>
             <property name="font">
              <font>
-              <pointsize>14</pointsize>
+              <family>Ubuntu</family>
+              <pointsize>22</pointsize>
               <weight>75</weight>
+              <italic>false</italic>
               <bold>true</bold>
              </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="text">
              <string>Reset</string>
@@ -548,6 +723,7 @@ background-repeat:repat;
            <widget class="QLabel" name="cameraLabel">
             <property name="font">
              <font>
+              <family>Ubuntu</family>
               <pointsize>22</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -572,12 +748,25 @@ background-repeat:repat;
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="font">
+             <font>
+              <family>Ubuntu</family>
+              <pointsize>22</pointsize>
+              <weight>75</weight>
+              <italic>false</italic>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(255, 255, 255);</string>
+            </property>
            </widget>
           </item>
           <item row="2" column="1">
            <widget class="QLabel" name="FPSLabel">
             <property name="font">
              <font>
+              <family>Ubuntu</family>
               <pointsize>22</pointsize>
               <weight>75</weight>
               <bold>true</bold>
@@ -605,6 +794,18 @@ background-repeat:repat;
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="font">
+             <font>
+              <family>Ubuntu</family>
+              <pointsize>22</pointsize>
+              <weight>75</weight>
+              <italic>false</italic>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(255, 255, 255);</string>
+            </property>
            </widget>
           </item>
           <item row="1" column="1">
@@ -617,10 +818,15 @@ background-repeat:repat;
             </property>
             <property name="font">
              <font>
-              <pointsize>14</pointsize>
+              <family>Ubuntu</family>
+              <pointsize>22</pointsize>
               <weight>75</weight>
+              <italic>false</italic>
               <bold>true</bold>
              </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">background-color: rgb(255, 255, 255);</string>
             </property>
             <property name="text">
              <string>Detection</string>

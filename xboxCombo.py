@@ -29,6 +29,8 @@ class xbox(QtCore.QThread):
 		self.manipulatorMax = 2100.0
 
                 self.clawState = 1
+                  
+                self.count = 0
 
 		self.Command = "";
 		
@@ -120,15 +122,18 @@ class xbox(QtCore.QThread):
                         #Manual control
                         actuatorType = self.actuatorTracker[-1]
                         if(joystick2.get_button(6)):
-                            self.actuatorTracker[-1] = actuatorType ^ 1
-                        count = 0
+                            self.actuatorTracker[-1] = 1
+                        elif(joystick2.get_button(7)):
+                            self.actuatorTracker[-1] = 0
+                        lastCount = self.count    
+                        self.count = 0
                         if(self.actuatorTracker[-1] == 1):
                             self.actuatorTracker[0] = joystick2.get_button(11)
                             self.actuatorTracker[1] = joystick2.get_button(14)
                             self.actuatorTracker[2] = joystick2.get_button(13)
                             self.actuatorTracker[3] = joystick2.get_button(12)
                             for i in range(0, 4):
-                                count += self.actuatorTracker[i]
+                                self.count += self.actuatorTracker[i]
 
                         #Turn left
                         if joystick2.get_button(4):
@@ -165,10 +170,14 @@ class xbox(QtCore.QThread):
                             pos = True
                    
                         #Change cameras or suspension using drive controller buttons
-                        if(count > 0 or actuatorType != self.actuatorTracker[-1]):         
+                        if(self.count > 0 or actuatorType != self.actuatorTracker[-1]):         
                             actStr = ','.join(str(x) for x in self.actuatorTracker)
-                            rightStickStr = str((self.rightMotor - 127) * -2)
+                            rightStickStr = '0'
+                            if(math.fabs(joystick2.get_axis(4)) > .2):
+                                rightStickStr = str(joystick2.get_axis(4) * -254)
                             self.Command = "A" + actStr + ',' + rightStickStr
+                        elif(lastCount > 0 and self.count == 0):
+                            self.Command = "A1,1,1,1,1,0"
                         elif(joystick2.get_button(0)):
                             self.Command = "C4"
                         elif(joystick2.get_button(1)):

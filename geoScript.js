@@ -10,8 +10,8 @@ var log = function(log){
 var initMap = function () {
     var mapEl = document.getElementById('container');
     var mapProp = {
-        center: new google.maps.LatLng(51.508742, -0.120850),
-        zoom: 8
+        center: new google.maps.LatLng(29.565054, -95.081179),
+        zoom: 19
         //mapTypeId: google.maps.MapTypeId.SATELLITE
     };
     map = new google.maps.Map(mapEl, mapProp);
@@ -60,7 +60,7 @@ var resetSize = function(width, height){
 var init = function () {
     log("start");
     initMap();
-    plotRoute();
+    //plotRoute();
 }
 
 document.addEventListener("DOMContentLoaded",init,false);

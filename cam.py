@@ -55,9 +55,11 @@ class camThread(QtCore.QThread):
         
     def run(self):
         self.player.set_state(gst.STATE_PLAYING)
+        self.audioPlayer.set_state(gst.STATE_PLAYING)
         self.detectionPlayer.set_state(gst.STATE_PLAYING)                                                                               
     def quit(self):
         self.player.set_state(gst.STATE_NULL)
+        self.audioPlayer.set_state(gst.STATE_NULL)
         self.detectionPlayer.set_state(gst.STATE_NULL)
         if self.player:
             del self.player
@@ -77,6 +79,12 @@ class camThread(QtCore.QThread):
         #H264 2 Streams
         #self.player = gst.parse_launch('udpsrc port=1234 caps="application/x-rtp, payload=127" ! rtph264depay ! ffdec_h264 ! xvimagesink sync=false udpsrc port=1235 caps="application/x-rtp, payload=127" ! rtph264depay ! ffdec_h264 ! xvimagesink sync=false')
         #Drive stream setup
+        audioStr = 'udpsrc port=1236 caps="application/x-rtp, media=(string)audio, clock-rate=(int)8000, encoding-name=(string)AMR, encoding-params=(string)1, octet-align=(string)1, payload=(int)96" ! rtpamrdepay ! amrnbdec ! audioconvert ! alsasink'
+
+        #audioStr= ""
+
+        self.audioPlayer = gst.parse_launch(audioStr)
+
         self.player = gst.parse_launch('udpsrc port=1234 caps="application/x-rtp, payload=127" ! gstrtpjitterbuffer ! rtpjpegdepay ! jpegdec ! xvimagesink sync=false')
         self.bus = self.player.get_bus()
         self.bus.add_signal_watch()

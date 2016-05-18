@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'DetectionWindow/detectionwindow.ui'
 #
-# Created: Mon May 16 17:56:41 2016
+# Created: Wed May 18 13:42:23 2016
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
