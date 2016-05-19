@@ -30,9 +30,8 @@
        </sizepolicy>
       </property>
       <property name="styleSheet">
-       <string notr="true">image:url(/home/sblinux/Pictures/Bulls.jpg);
+       <string notr="true">image:url(/home/ieee-2/Pictures/Bulls.jpg);
 background:white;
-background-repeat:repat;
 </string>
       </property>
      </widget>

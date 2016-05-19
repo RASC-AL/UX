@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'MainWindow/mainwindow.ui'
 #
-# Created: Wed May 18 16:06:33 2016
-#      by: PyQt4 UI code generator 4.9.1
+# Created: Wed May 18 23:54:42 2016
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,16 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -30,9 +39,8 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.pic.sizePolicy().hasHeightForWidth())
         self.pic.setSizePolicy(sizePolicy)
-        self.pic.setStyleSheet(_fromUtf8("image:url(/home/sblinux/Pictures/Bulls.jpg);\n"
+        self.pic.setStyleSheet(_fromUtf8("image:url(/home/ieee-2/Pictures/Bulls.jpg);\n"
 "background:white;\n"
-"background-repeat:repat;\n"
 ""))
         self.pic.setObjectName(_fromUtf8("pic"))
         self.widget_2 = QtGui.QWidget(self.splitter)
@@ -548,22 +556,22 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "MainWindow", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_4.setText(QtGui.QApplication.translate("MainWindow", "Base", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("MainWindow", "Temperature", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_5.setText(QtGui.QApplication.translate("MainWindow", "Manipulator", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_9.setText(QtGui.QApplication.translate("MainWindow", "Right Motor", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_7.setText(QtGui.QApplication.translate("MainWindow", "Claw State", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_2.setText(QtGui.QApplication.translate("MainWindow", "Shoulder", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_8.setText(QtGui.QApplication.translate("MainWindow", "Left Motor", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_3.setText(QtGui.QApplication.translate("MainWindow", "Elbow", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_6.setText(QtGui.QApplication.translate("MainWindow", "Rover Data", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_10.setText(QtGui.QApplication.translate("MainWindow", "Pitch", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_11.setText(QtGui.QApplication.translate("MainWindow", "Roll", None, QtGui.QApplication.UnicodeUTF8))
-        self.startButton.setText(QtGui.QApplication.translate("MainWindow", "Start Cam", None, QtGui.QApplication.UnicodeUTF8))
-        self.stopButton.setText(QtGui.QApplication.translate("MainWindow", "Stop Cam", None, QtGui.QApplication.UnicodeUTF8))
-        self.resetButton.setText(QtGui.QApplication.translate("MainWindow", "Reset", None, QtGui.QApplication.UnicodeUTF8))
-        self.cameraLabel.setText(QtGui.QApplication.translate("MainWindow", "Camera", None, QtGui.QApplication.UnicodeUTF8))
-        self.FPSLabel.setText(QtGui.QApplication.translate("MainWindow", "FPS", None, QtGui.QApplication.UnicodeUTF8))
-        self.detectionButton.setText(QtGui.QApplication.translate("MainWindow", "Detection", None, QtGui.QApplication.UnicodeUTF8))
+        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow", None))
+        self.label_4.setText(_translate("MainWindow", "Base", None))
+        self.label.setText(_translate("MainWindow", "Temperature", None))
+        self.label_5.setText(_translate("MainWindow", "Manipulator", None))
+        self.label_9.setText(_translate("MainWindow", "Right Motor", None))
+        self.label_7.setText(_translate("MainWindow", "Claw State", None))
+        self.label_2.setText(_translate("MainWindow", "Shoulder", None))
+        self.label_8.setText(_translate("MainWindow", "Left Motor", None))
+        self.label_3.setText(_translate("MainWindow", "Elbow", None))
+        self.label_6.setText(_translate("MainWindow", "Rover Data", None))
+        self.label_10.setText(_translate("MainWindow", "Pitch", None))
+        self.label_11.setText(_translate("MainWindow", "Roll", None))
+        self.startButton.setText(_translate("MainWindow", "Start Cam", None))
+        self.stopButton.setText(_translate("MainWindow", "Stop Cam", None))
+        self.resetButton.setText(_translate("MainWindow", "Reset", None))
+        self.cameraLabel.setText(_translate("MainWindow", "Camera", None))
+        self.FPSLabel.setText(_translate("MainWindow", "FPS", None))
+        self.detectionButton.setText(_translate("MainWindow", "Detection", None))
 

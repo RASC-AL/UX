@@ -10,7 +10,7 @@ var log = function(log){
 var initMap = function () {
     var mapEl = document.getElementById('container');
     var mapProp = {
-        center: new google.maps.LatLng(29.565054, -95.081179),
+        center: new google.maps.LatLng(29.564904, -95.0814),
         zoom: 19
         //mapTypeId: google.maps.MapTypeId.SATELLITE
     };

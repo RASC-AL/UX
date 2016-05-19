@@ -38,9 +38,9 @@
            </size>
           </property>
           <property name="styleSheet">
-           <string notr="true">image:url(/home/sblinux/Pictures/Bulls.jpg);
+           <string notr="true">image:url(/home/ieee-2/Pictures/Bulls.jpg);
 background:white;
-background-repeat:repat;</string>
+</string>
           </property>
          </widget>
          <widget class="QWidget" name="GPSWidget" native="true">
@@ -55,8 +55,8 @@ background-repeat:repat;</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_3">
            <item>
-            <widget class="QWebView" name="GPSWebView">
-             <property name="url">
+            <widget class="QWebView" name="GPSWebView" native="true">
+             <property name="url" stdset="0">
               <url>
                <string>about:blank</string>
               </url>

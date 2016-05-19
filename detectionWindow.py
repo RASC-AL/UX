@@ -9,7 +9,7 @@ class detectionWindow(QtGui.QWidget):
         self.ui.setupUi(self)
         self.parent = parent
         self.GPSWebView = self.ui.GPSWebView
-        self.GPSWebView.load(QtCore.QUrl("file:////home/sblinux/CommunicationUX/UX/UX/geo.html"))
+        self.GPSWebView.load(QtCore.QUrl("file:////home/ieee-2/UX/geo.html"))
         self.GPSWebView.loadFinished.connect(self.webAppReady)
         self.showMaximized()
         self.setVisible(False)
