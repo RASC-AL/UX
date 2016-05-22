@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'MainWindow/mainwindow.ui'
 #
-# Created: Wed May 18 23:54:42 2016
+# Created: Thu May 19 20:31:00 2016
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -446,22 +446,22 @@ class Ui_MainWindow(object):
         self.startButton.setStyleSheet(_fromUtf8("background-color: rgb(255, 255, 255);"))
         self.startButton.setObjectName(_fromUtf8("startButton"))
         self.gridLayout_3.addWidget(self.startButton, 0, 0, 1, 1)
-        self.stopButton = QtGui.QPushButton(self.widget)
+        self.mastButton = QtGui.QPushButton(self.widget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.stopButton.sizePolicy().hasHeightForWidth())
-        self.stopButton.setSizePolicy(sizePolicy)
+        sizePolicy.setHeightForWidth(self.mastButton.sizePolicy().hasHeightForWidth())
+        self.mastButton.setSizePolicy(sizePolicy)
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Ubuntu"))
         font.setPointSize(22)
         font.setBold(True)
         font.setItalic(False)
         font.setWeight(75)
-        self.stopButton.setFont(font)
-        self.stopButton.setStyleSheet(_fromUtf8("background-color: rgb(255, 255, 255);"))
-        self.stopButton.setObjectName(_fromUtf8("stopButton"))
-        self.gridLayout_3.addWidget(self.stopButton, 0, 1, 1, 1)
+        self.mastButton.setFont(font)
+        self.mastButton.setStyleSheet(_fromUtf8("background-color: rgb(255, 255, 255);"))
+        self.mastButton.setObjectName(_fromUtf8("mastButton"))
+        self.gridLayout_3.addWidget(self.mastButton, 0, 1, 1, 1)
         self.resetButton = QtGui.QPushButton(self.widget)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -502,7 +502,8 @@ class Ui_MainWindow(object):
         font.setItalic(False)
         font.setWeight(75)
         self.comboCameraSelect.setFont(font)
-        self.comboCameraSelect.setStyleSheet(_fromUtf8("background-color: rgb(255, 255, 255);"))
+        self.comboCameraSelect.setStyleSheet(_fromUtf8("background-color: rgb(255, 255, 255);\n"
+"text-align:center;"))
         self.comboCameraSelect.setObjectName(_fromUtf8("comboCameraSelect"))
         self.gridLayout_3.addWidget(self.comboCameraSelect, 3, 0, 1, 1)
         self.FPSLabel = QtGui.QLabel(self.widget)
@@ -530,7 +531,8 @@ class Ui_MainWindow(object):
         font.setItalic(False)
         font.setWeight(75)
         self.comboFPSSelect.setFont(font)
-        self.comboFPSSelect.setStyleSheet(_fromUtf8("background-color: rgb(255, 255, 255);"))
+        self.comboFPSSelect.setStyleSheet(_fromUtf8("background-color: rgb(255, 255, 255);\n"
+"text-align:center;"))
         self.comboFPSSelect.setObjectName(_fromUtf8("comboFPSSelect"))
         self.gridLayout_3.addWidget(self.comboFPSSelect, 3, 1, 1, 1)
         self.detectionButton = QtGui.QPushButton(self.widget)
@@ -569,7 +571,7 @@ class Ui_MainWindow(object):
         self.label_10.setText(_translate("MainWindow", "Pitch", None))
         self.label_11.setText(_translate("MainWindow", "Roll", None))
         self.startButton.setText(_translate("MainWindow", "Start Cam", None))
-        self.stopButton.setText(_translate("MainWindow", "Stop Cam", None))
+        self.mastButton.setText(_translate("MainWindow", "Release Mast", None))
         self.resetButton.setText(_translate("MainWindow", "Reset", None))
         self.cameraLabel.setText(_translate("MainWindow", "Camera", None))
         self.FPSLabel.setText(_translate("MainWindow", "FPS", None))

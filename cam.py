@@ -79,6 +79,8 @@ class camThread(QtCore.QThread):
         #Drive stream setup
         audioStr = ' udpsrc port=1236 caps="application/x-rtp, media=(string)audio, clock-rate=(int)8000, encoding-name=(string)AMR, encoding-params=(string)1, octet-align=(string)1, payload=(int)96" ! rtpamrdepay ! amrnbdec ! audioconvert ! alsasink'
 
+        #audioStr = ""
+
         self.player = gst.parse_launch('udpsrc port=1234 caps="application/x-rtp, payload=127" ! gstrtpjitterbuffer ! rtpjpegdepay ! jpegdec ! xvimagesink sync=false' + audioStr)
         self.bus = self.player.get_bus()
         self.bus.add_signal_watch()

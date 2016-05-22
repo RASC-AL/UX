@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 '''
 Created on Feb 6, 2015
 
@@ -21,12 +20,15 @@ from mainWindowUI import Ui_MainWindow as mainUI
 #from camGTK3 import camThread
 from xboxCombo import xbox
 from server import customServer
+from gpsServer import gpsServer
 import os
 
 roverSocket = None
 port = 9999
-roverip = '128.205.55.154' #Local
-#roverip = '166.166.193.135' #GX440
+gpsPort = 22336
+#roverip = '128.205.55.154' #LocalBackup
+#roverip = '128.205.55.189' #MainRover
+roverip = '166.166.193.135' #GX440
 #roverip = '166.161.234.059' #GX450
 MSGLEN = 64
 
@@ -35,6 +37,7 @@ MSGLEN = 64
 #The socket used for receiving data is in server.py. The sockets are kept separate because the rover has 2 different nodes for
 #receiving and sending data.
 def send_data(msg):
+    print msg + "End"
     msg = pad(msg)
     global roverSocket
     try:
@@ -51,7 +54,7 @@ def send_data(msg):
                 raise RuntimeError("socket connection broken")
             totalsent = totalsent + sent
         '''
-        roverSocket.sendto(msg, (roverip, 9999))
+        roverSocket.sendto(msg, (roverip, port))
     #print 'sent message ' + msg
     except Exception, e:
         if roverSocket is None:
@@ -89,24 +92,26 @@ class Rover(QtGui.QWidget):
         self.initUI()
         self.xbox = None
         self.server = None
+        self.gpsServer = None
         self.startServer()
         self.startXbox()
+        self.startGPS()
         self.detectionWindow = detectionWindow(self)
-        self.camValue = 0
+        self.camValue = 4
         self.FPS = 15
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
-        self.panMin = 1100
-        self.panMax = 1900
-        self.panRate = 5
-        self.tiltMin = 1100
-        self.tiltMax = 1900
-        self.tiltRate = 5
+        self.panMin = 0
+        self.panMax = 180
+        self.panRate = 1
+        self.tiltMin = 0
+        self.tiltMax = 75
+        self.tiltRate = 1
         #Pan, Tilt, Zoom, Current Cam
-        self.ptzTracker = [[1500, 1500, 0], [1500, 1500, 0]] 
+        self.ptzTracker = [[90, 0, 0], [90, 0, 0]] 
         self.currentCam = 0
     def initUI(self):   
-        self.ui.comboCameraSelect.addItem("camera0")
-        self.ui.comboCameraSelect.addItem("camera1")
+        self.ui.comboCameraSelect.addItem("Drive Camera")
+        self.ui.comboCameraSelect.addItem("Rock Camera")
 
         self.ui.comboCameraSelect.activated[str].connect(self.onComboCamSelected)
         self.ui.comboCameraSelect
@@ -125,7 +130,7 @@ class Rover(QtGui.QWidget):
         #Start button for the camera feed      
         self.ui.startButton.clicked.connect(self.startCam)
                 
-        self.ui.stopButton.clicked.connect(self.stopCam)
+        self.ui.mastButton.clicked.connect(self.releaseMast)
 
         self.ui.resetButton.clicked.connect(self.onResetClicked)
  
@@ -153,36 +158,33 @@ class Rover(QtGui.QWidget):
     
     def keyPressEvent(self, event):
         eventOccurred = True
-        if(event.key() == QtCore.Qt.Key_Left):
+        if(event.key() == QtCore.Qt.Key_D):
 	    self.ptzTracker[self.currentCam][0] -= self.panRate
 	    if(self.ptzTracker[self.currentCam][0] < self.panMin):
 	        self.ptzTracker[self.currentCam][0] = self.panMin
-        elif(event.key() == QtCore.Qt.Key_Right):
+        elif(event.key() == QtCore.Qt.Key_A):
             self.ptzTracker[self.currentCam][0] += self.panRate
             if(self.ptzTracker[self.currentCam][0] > self.panMax):
                 self.ptzTracker[self.currentCam][0] = self.panMax
-        elif(event.key() == QtCore.Qt.Key_Down):
+        elif(event.key() == QtCore.Qt.Key_W):
             self.ptzTracker[self.currentCam][1] -= self.tiltRate
             if(self.ptzTracker[self.currentCam][1] < self.tiltMin):
                 self.ptzTracker[self.currentCam][1] = self.tiltMin
-        elif(event.key() == QtCore.Qt.Key_Up):
+        elif(event.key() == QtCore.Qt.Key_S):
             self.ptzTracker[self.currentCam][1] += self.tiltRate
             if(self.ptzTracker[self.currentCam][1] > self.tiltMax):
                 self.ptzTracker[self.currentCam][1] = self.tiltMax
-        elif(event.key() == QtCore.Qt.Key_Shift):
-            self.ptzTracker[self.currentCam][2] = 1
-        elif(event.key() == QtCore.Qt.Key_Space and not event.isAutoRepeat()):
+        elif(event.key() == QtCore.Qt.Key_Shift and not event.isAutoRepeat()):
             self.ptzTracker[self.currentCam][2] = 0
             self.currentCam = self.currentCam ^ 1 
+            self.detectionWindow.switchCam()
         else:
             eventOccurred = False
         
         if(self.ptzTracker[self.currentCam][2] == 1 and eventOccurred):
             self.handleDigitalZoom()
         elif(eventOccurred):
-            ptzStr = "P" + ','.join(str(x) for x in self.ptzTracker[0][0:2]) + \
-                     ',' + ','.join(str(x) for x in self.ptzTracker[1][0:2]) + \
-                     ',' + str(self.currentCam)
+            ptzStr = self.getPTZString()
             print ptzStr
             send_data(ptzStr)
 
@@ -190,11 +192,23 @@ class Rover(QtGui.QWidget):
         if(event.isAutoRepeat()):
             return
         eventOccurred = True
+        '''
         if(event.key() == QtCore.Qt.Key_Shift):
             self.ptzTracker[self.currentCam][2] = 0
             self.handleDigitalZoom()
         else:
             eventOccurred = False
+        '''
+
+    def setPTZForDrop(self):
+        self.ptzTracker[0][0:2] = [180, 0]
+        self.ptzTracker[1][0:2] = [180, 0]
+        send_data(self.getPTZString())
+
+    def getPTZString(self):
+        return "P" + ','.join(str(x) for x in self.ptzTracker[0][0:2]) + \
+        ',' + ','.join(str(x) for x in self.ptzTracker[1][0:2]) + \
+        ',' + str(self.currentCam)
 
     #TODO
     def handleDigitalZoom(self):
@@ -221,6 +235,7 @@ class Rover(QtGui.QWidget):
         send_data('R')
 
     def onDetectionClicked(self):
+        self.connect(self.detectionWindow, self.detectionWindow.signal,  send_data) 
         self.detectionWindow.showMax()
 
     #Not currently being used
@@ -273,7 +288,10 @@ class Rover(QtGui.QWidget):
         cp = QtGui.QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft()) 
-          
+    
+    def releaseMast(self):
+        send_data('M')  
+
     def stopCam(self):
         if(self.cam!=None):                             
             self.cam.quit()
@@ -294,8 +312,8 @@ class Rover(QtGui.QWidget):
         
     def startXbox(self):
         if(self.xbox==None):  
-            self.xbox = xbox()     
-            self.connect( self.xbox,  self.xbox.signal, self.xboxCallBackfunc)    
+            self.xbox = xbox(self)     
+            self.connect(self.xbox,  self.xbox.signal, self.xboxCallBackfunc)    
             self.xbox.start() 
         else:
             self.xbox.stop() 
@@ -345,9 +363,14 @@ class Rover(QtGui.QWidget):
         elif(sigStr[0] == 'd'):
             #print(sigStr)
             dataValues = sigStr[1:].split(',')
-            self.ui.pitch.setText('Pitch: ' + dataValues[4] + ' Degrees')
-            self.ui.roll.setText('Roll: ' + dataValues[5] + ' Degrees')
-                
+            self.ui.pitch.setText(dataValues[0] + ' Degrees')
+            self.ui.roll.setText(dataValues[1] + ' Degrees')
+    
+    def startGPS(self):
+        if(self.gpsServer is None):
+            self.gpsServer = gpsServer(gpsPort)
+            self.gpsServer.start() 
+
 class MyTextEdit(QtGui.QWidget):
     def __init__(self,parent):
         super(MyTextEdit, self).__init__(parent)                   

@@ -20,10 +20,12 @@ from detectionWindow import detectionWindow
 #from camGTK3 import camThread
 from xboxCombo import xbox
 from server import customServer
+from gpsServer import gpsServer
 import os
 
 roverSocket = None
 port = 9999 
+gpsPort = 22335
 #roverip = '128.205.55.154' #Local
 #roverip = '166.166.193.135' #GX440
 roverip = '166.161.234.059' #GX450
@@ -89,6 +91,7 @@ class Rover(QtGui.QMainWindow):
         self.initUI()
         self.xbox = None
         self.server = None
+        self.gpsServer = None
         self.startServer()
         self.startXbox()
         self.detectionWindow = detectionWindow(self)
@@ -492,6 +495,11 @@ class Rover(QtGui.QMainWindow):
             self.pitch.setText('Pitch: ' + dataValues[4] + ' Degrees')
             self.roll.setText('Roll: ' + dataValues[5] + ' Degrees')
                 
+    def startGPS(self): 
+        if(self.gpsServer is None):
+            self.gpsServer = gpsServer(gpsPort)
+            self.gpsServer.start()
+
 class MyTextEdit(QtGui.QWidget):
     def __init__(self,parent):
         super(MyTextEdit, self).__init__(parent)                   

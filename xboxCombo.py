@@ -1,5 +1,6 @@
-import pygame
 import os
+import sys
+import pygame
 import time
 import socket
 import globals
@@ -14,10 +15,11 @@ import math
 
 class xbox(QtCore.QThread):
 	
-	def __init__(self):
+	def __init__(self, parent):
 		QtCore.QThread.__init__(self)
 		self.signal = QtCore.SIGNAL("signal")
-		
+                self.parent = parent	     
+
 		self.basePosition = 1500.0
                 self.baseMod = 4
                 self.baseMin = 1100.0
@@ -42,7 +44,16 @@ class xbox(QtCore.QThread):
 		self.instructionsPerSecond = 8.0
 	        
                 self.speedMod = 2.0
- 	
+
+                self.dropTime = 0
+                self.homeTime = 0
+                self.clawTime = 0
+                self.flag = 0
+                self.pos = False
+
+                self.shoulderPosition = 0
+                self.elbowPosition= 200
+
 		self.clear = lambda: os.system('cls')
 		
 		pygame.init()
@@ -66,14 +77,12 @@ class xbox(QtCore.QThread):
 		    for event in pygame.event.get(): # User did something
 		        if event.type == pygame.QUIT: # If user clicked close
 		            done=True # Flag that we are done so we exit this loop
-		        
+		    
 		    joystick = pygame.joystick.Joystick(0)
 		    joystick.init()
 		        
 		    joystick2 = pygame.joystick.Joystick(1)
 		    joystick2.init()
-		    
-                    pos = False
 
                     #print(time.time() - globals.now)	    
                     if time.time() - globals.now < 2:
@@ -149,26 +158,27 @@ class xbox(QtCore.QThread):
                             if math.fabs(joystick2.get_axis(4)) > .2:
 		                self.rightMotor = -joystick2.get_axis(4) / self.speedMod * 127 + 127
                         #End of drive control
-
-
 		        if(joystick.get_button(0) ==  1):
 		            self.clawState = 1        
-		        elif(joystick.get_button(1) ==  1):
+		        elif(joystick.get_button(1) == 1):
 		            self.clawState = 0
                         #Drop position (X)
                         elif(joystick.get_button(2)):
-                            elbowPosition = 1194.0
-                            shoulderPosition = 1000.0
-                            self.manipulatorPosition = 1830.0
-                            self.basePosition = 1800.0
-                            pos = True
+                            self.elbowPosition = 500
+                            self.shoulderPosition = 0
+                            self.flag = 1
+                            self.dropTime = time.time()
+                            self.pos = True
                         #Home Position (Y)
                         elif(joystick.get_button(3)):
-                            elbowPosition = 1100.0
-                            shoulderPosition = 1000.0
-                            self.basePosition = 1500.0
-                            pos = True
-                   
+                            self.elbowPosition = 450
+                            self.shoulderPosition = 300
+                            self.flag = 2
+                            self.homeTime = time.time()
+                            self.pos = True
+                        elif(joystick.get_button(4)):
+                            self.parent.setPTZForDrop()
+  
                         #Change cameras or suspension using drive controller buttons
                         if(self.count > 0 or actuatorType != self.actuatorTracker[-1]):         
                             actStr = ','.join(str(x) for x in self.actuatorTracker)
@@ -187,11 +197,28 @@ class xbox(QtCore.QThread):
                         elif(joystick2.get_button(3)):
                             self.Command = "F2"
                         else:
-                            leadChar = 'l' if pos else 's'
-                            self.Command = leadChar + str(int(round(elbowPosition))) + "," + str(int(round(shoulderPosition))) + "," + str(int(round(self.basePosition))) + "," + str(int(round(self.manipulatorPosition))) + "," + str(int(round(self.clawState))) + "," + str(int(round(self.rightMotor))) + "," + str(int(round(self.leftMotor)));
+                            self.Command = 's' + str(int(round(elbowPosition))) + "," + str(int(round(shoulderPosition)))
+                            if self.pos:
+                                self.Command = 'l' + str(int(round(self.elbowPosition))) + "," + str(int(round(self.shoulderPosition))) 
+                            self.Command = self.Command + "," + str(int(round(self.basePosition))) + "," + str(int(round(self.manipulatorPosition))) + "," + str(int(round(self.clawState))) + "," + str(int(round(self.rightMotor))) + "," + str(int(round(self.leftMotor)));
 		        print self.Command		  
 		        self.emit(self.signal, self.Command)
 		        self.Command = ""
+
+                        #Drop Position(X)
+                        if(self.flag == 1 and time.time() - self.dropTime > 10):
+                            self.manipulatorPosition = 2100
+                            self.basePosition = 1150
+                            self.flag = 0
+                            self.pos = True
+                        #Home Position(Y)
+                        elif(self.flag == 2 and time.time() - self.homeTime > 5):
+                            self.basePosition = 1450
+                            self.manipulatorPosition = 1850
+                            self.flag = 0
+                            self.pos = True
+                        else:
+                            self.pos = False
 
 		    # Limit to 16 frames per second
 		    time.sleep(1 / self.instructionsPerSecond)
