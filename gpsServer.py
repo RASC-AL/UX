@@ -24,10 +24,10 @@ class gpsServer(QtCore.QThread):
     def gpsCallback(self, sigStr):
         #print " ".join(hex(ord(n)) for n in sigStr)
         strArr = sigStr.split(',')
-        if(strArr[0] == '$GPGGA'):
-            lat, lon = self.getLatLongFromNMEA(strArr)
-            print lat
-            print lon
+        #if(strArr[0] == '$GPGGA'):
+        #    lat, lon = self.getLatLongFromNMEA(strArr)
+        #    print lat
+        #    print lon
         print sigStr
 
     def getLatLongFromNMEA(self, nmeaSen):

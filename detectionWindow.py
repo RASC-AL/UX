@@ -12,7 +12,7 @@ class detectionWindow(QtGui.QWidget):
         self.signal = QtCore.SIGNAL("signal")       
 
         self.GPSWebView = self.ui.GPSWebView
-        self.GPSWebView.load(QtCore.QUrl("file:////home/ieee-2/UX/geo.html"))
+        self.GPSWebView.load(QtCore.QUrl("file:////home/ieee/UX/geo.html"))
         self.GPSWebView.loadFinished.connect(self.webAppReady)
 
         for i in range(1, 7):

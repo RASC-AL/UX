@@ -28,7 +28,7 @@ class xbox(QtCore.QThread):
 		self.manipulatorPosition = 1500.0
 		self.manipulatorMod = 4
 		self.manipulatorMin = 600.0
-		self.manipulatorMax = 2100.0
+		self.manipulatorMax = 2400.0
 
                 self.clawState = 1
                   
@@ -49,6 +49,7 @@ class xbox(QtCore.QThread):
                 self.homeTime = 0
                 self.clawTime = 0
                 self.flag = 0
+                self.ptzFlag = 0
                 self.pos = False
 
                 self.shoulderPosition = 0
@@ -85,7 +86,7 @@ class xbox(QtCore.QThread):
 		    joystick2.init()
 
                     #print(time.time() - globals.now)	    
-                    if time.time() - globals.now < 2:
+                    if time.time() - globals.now < 200:
                         #Wrist Movement
                         if joystick.get_button(5) and math.fabs(joystick.get_axis(4)) > .2:
 		            elbowPosition = 0
@@ -164,7 +165,7 @@ class xbox(QtCore.QThread):
 		            self.clawState = 0
                         #Drop position (X)
                         elif(joystick.get_button(2)):
-                            self.elbowPosition = 500
+                            self.elbowPosition = 400
                             self.shoulderPosition = 0
                             self.flag = 1
                             self.dropTime = time.time()
@@ -177,7 +178,7 @@ class xbox(QtCore.QThread):
                             self.homeTime = time.time()
                             self.pos = True
                         elif(joystick.get_button(4)):
-                            self.parent.setPTZForDrop()
+                            self.ptzFlag = 1
   
                         #Change cameras or suspension using drive controller buttons
                         if(self.count > 0 or actuatorType != self.actuatorTracker[-1]):         
@@ -205,20 +206,33 @@ class xbox(QtCore.QThread):
 		        self.emit(self.signal, self.Command)
 		        self.Command = ""
 
+                        dropTime = 10
+                        homeTime = 5 
+
                         #Drop Position(X)
-                        if(self.flag == 1 and time.time() - self.dropTime > 10):
-                            self.manipulatorPosition = 2100
-                            self.basePosition = 1150
+                        if(self.flag == 1 and time.time() - self.dropTime > dropTime):
+                            self.manipulatorPosition = self.manipulatorMax
+                            self.basePosition = 1120
                             self.flag = 0
                             self.pos = True
+                        elif(self.flag == 1 and self.manipulatorPosition < self.manipulatorMax):
+                            diff = self.manipulatorMax - self.manipulatorPosition
+                            self.manipulatorPosition += min(40, diff)
+                            self.pos = False
                         #Home Position(Y)
-                        elif(self.flag == 2 and time.time() - self.homeTime > 5):
-                            self.basePosition = 1450
-                            self.manipulatorPosition = 1850
+                        elif(self.flag == 2 and time.time() - self.homeTime > homeTime):
+                            self.basePosition = 1100
+                            self.manipulatorPosition = 2400
                             self.flag = 0
                             self.pos = True
                         else:
                             self.pos = False
+                       
+                        #Cam presets
+                        if(self.ptzFlag == 1):
+                            changed = self.parent.setPTZForDrop()
+                            if(not changed):
+                                self.ptzFlag = 0
 
 		    # Limit to 16 frames per second
 		    time.sleep(1 / self.instructionsPerSecond)

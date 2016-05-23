@@ -28,8 +28,8 @@ port = 9999
 gpsPort = 22336
 #roverip = '128.205.55.154' #LocalBackup
 #roverip = '128.205.55.189' #MainRover
-roverip = '166.166.193.135' #GX440
-#roverip = '166.161.234.059' #GX450
+#roverip = '166.166.193.135' #GX440
+roverip = '166.161.234.059' #GX450
 MSGLEN = 64
 
 #communication: method for sending data across to rover. This socket is only meant for sending data to the rover 
@@ -201,9 +201,26 @@ class Rover(QtGui.QWidget):
         '''
 
     def setPTZForDrop(self):
-        self.ptzTracker[0][0:2] = [180, 0]
-        self.ptzTracker[1][0:2] = [180, 0]
+        changed = False
+        if(self.ptzTracker[0][0] > 0):
+            diff = self.ptzTracker[0][0] - 0
+            self.ptzTracker[0][0] -= min(5, diff)
+            changed = True
+        if(self.ptzTracker[0][1] > 0):
+            diff = self.ptzTracker[0][1] - 0
+            self.ptzTracker[0][1] -= min(5, diff)
+            changed = True
+        if(self.ptzTracker[1][0] < 180):
+            diff = 180 - self.ptzTracker[1][0]
+            self.ptzTracker[1][0] += min(5, diff)
+            changed = True
+        if(self.ptzTracker[1][1] > 0):
+            diff = self.ptzTracker[1][1] - 0
+            self.ptzTracker[1][1] -= min(5, diff)
+            changed = True
+
         send_data(self.getPTZString())
+        return changed
 
     def getPTZString(self):
         return "P" + ','.join(str(x) for x in self.ptzTracker[0][0:2]) + \
