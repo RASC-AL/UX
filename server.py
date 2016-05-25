@@ -14,14 +14,14 @@ import gst
 #in main.py
 class customServer(QtCore.QThread):
 
-	def __init__(self, port):
+	def __init__(self, port, bufferLength):
 	    QtCore.QThread.__init__(self)
 	    self.signal = QtCore.SIGNAL("server")
 	    self.messageNum = 0
 	    self.client = client.client()
 	    self.connections = []
 	    self.port = port
-	    #TODO check ip
+            self.bufferLength = bufferLength
 	    hostname = "0.0.0.0"
 	    self.serv = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	    self.serv.bind((hostname, int(port)))
@@ -44,7 +44,7 @@ class customServer(QtCore.QThread):
 	    self.client.send(data)
 
 	def receive(self):
-            chunk, addr = self.serv.recvfrom(64)
+            chunk, addr = self.serv.recvfrom(self.bufferLength)
 	    someString = str(chunk)
 	    #print 'Message received : ' + someString
 	    self.emit(self.signal, someString)

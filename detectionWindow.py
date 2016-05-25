@@ -1,5 +1,5 @@
 import sys
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui, QtCore, QtWebKit
 from detectionWindowUI import Ui_DetectionWindow as UI
 
 class detectionWindow(QtGui.QWidget):
@@ -12,10 +12,14 @@ class detectionWindow(QtGui.QWidget):
         self.signal = QtCore.SIGNAL("signal")       
 
         self.GPSWebView = self.ui.GPSWebView
+        self.GPSWebView.settings().setAttribute(QtWebKit.QWebSettings.LocalStorageEnabled, True)
+        self.GPSWebView.settings().enablePersistentStorage()
+        
         self.GPSWebView.load(QtCore.QUrl("file:////home/ieee/UX/geo.html"))
         self.GPSWebView.loadFinished.connect(self.webAppReady)
 
-        for i in range(1, 7):
+        self.ui.FPSComboBox.addItem("05") #Hack to avoid changing remote end
+        for i in range(2, 7):
             self.ui.FPSComboBox.addItem(str(i * 5))
         self.ui.FPSComboBox.setCurrentIndex(1)
         self.ui.FPSComboBox.activated[str].connect(self.selectFPS)
@@ -46,7 +50,7 @@ class detectionWindow(QtGui.QWidget):
         self.ui.splitter.splitterMoved.connect(self.showMax)
         self.ui.splitter_2.splitterMoved.connect(self.showMax)
 
-    def webAppReady(self):
+    def webAppReady(self):        
         pass
 
     def getWinId(self):
@@ -80,10 +84,19 @@ class detectionWindow(QtGui.QWidget):
         self.evaluateJS(scriptString)
 
     def handleOpen(self):
-        pass
+        scriptString = "openMarkers()"
+        print scriptString
+        self.evaluateJS(scriptString)
 
-    def handleSave(save):
-        pass
+    def handleSave(self):
+        scriptString = "saveMarkers()"
+        print scriptString
+        self.evaluateJS(scriptString)
+
+    def handleCallback(self, lat, lng):
+        scriptString = "addToRoute({0}, {1});".format(lat, lng)
+        print scriptString
+        self.evaluateJS(scriptString)
 
     def showMax(self):
         self.setVisible(True)
@@ -95,5 +108,4 @@ class detectionWindow(QtGui.QWidget):
 
     def evaluateJS(self, scriptString):
         self.GPSWebView.page().mainFrame().evaluateJavaScript(scriptString)
-
 

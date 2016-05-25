@@ -3,7 +3,10 @@ var directionsService = new google.maps.DirectionsService();
 var directionsDisplay = new google.maps.DirectionsRenderer();
 var map;
 var markers = [];
+var route = [];
+var lastPos = 0;
 var markerColor = "Purple";
+//var util = require('util');
 function log(log){
     console.log(log);
 }
@@ -68,7 +71,7 @@ function showCircle(latlng) {
         fillOpacity: 1,
         map: map,
         center: latlng,
-        radius: 1.5
+        radius: .75
     });
     markerCircle.addListener('rightclick', function(e) {
         markerCircle.setMap(null);
@@ -82,23 +85,71 @@ function setMarkerColor(color) {
     markerColor = color;
 }
 
+function addToRoute(lat, lng) {
+    latlng = new google.maps.LatLng(lat, lng);
+    if(lastPos == 0) {
+        lastPos = latlng;
+    }
+    else {
+        var pathCoordinates = [
+            lastPos,
+            latlng
+        ];
+
+        var path = new google.maps.Polyline({
+            path: pathCoordinates,
+            geodesic: true,
+            strokeColor: "Black",
+            strokeOpacity: 1.0,
+            strokeWeight: 5
+        });
+
+        path.setMap(map);
+        lastPos = latlng;
+        route.push(path);
+    }
+}
+
 function clearScreen(clearType) {
-    log("reached1");
     if(clearType === "Markers" || clearType === "All") { 
-        log("Reached2")
         for(var i = 0; i < markers.length; i++) {
-            log("Reached3")
             markers[i].setMap(null);
         }
         markers = []
     }
     if(clearType === "Route" || clearType === "All") {
-
+        for(var i = 0; i < route.length; i++) {
+            route[i].setMap(null);  
+        }
+        route = [];
+        lastPos = 0;
     }
 }
 
+//Should be extended to allow for multiple sets of data
 function saveMarkers() {
+    markersData = []
+    for(var i = 0; i < markers.length; i++) {
+        var markerData = {lat: markers[i].center.lat(), lng: markers[i].center.lng(), color: markers[i].strokeColor}
+        markersData.push(markerData)
+    }
+    localStorage.setItem('RockMap', JSON.stringify(markersData));
+}
 
+function openMarkers() {
+    clearScreen("Markers");
+    var retStr = localStorage.getItem('RockMap');
+    if(retStr != null) {
+        markersData = JSON.parse(retStr);
+        oldColor = markerColor;
+        for(var i = 0; i < markersData.length; i++) {
+            markerColor = markersData[i].color;
+            lat = markersData[i].lat;
+            lng = markersData[i].lng;
+            showCircle(new google.maps.LatLng(lat, lng));
+        }
+        markerColor = oldColor;
+    }
 }
 
 function resetSize(width, height){
@@ -110,7 +161,11 @@ function resetSize(width, height){
 function init() {
     log("start");
     initMap();
-    //plotRoute();
+    //showCircle(new google.maps.LatLng(29.564924, -95.0814));
+    //showCircle(new google.maps.LatLng(29.564944, -95.0814));
+    //showCircle(new google.maps.LatLng(29.564904, -95.0814));
+    //saveMarkers();
+    //openMarkers();
 }
 
 document.addEventListener("DOMContentLoaded",init,false);

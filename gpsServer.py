@@ -10,25 +10,28 @@ from server import customServer
 
 class gpsServer(QtCore.QThread):
 
-    def __init__(self, port):
+    def __init__(self, port, detectionWindow):
         QtCore.QThread.__init__(self)
         self.port = port
+        self.bufferLength = 128
         self.server = None
+        self.detectionWindow = detectionWindow
 
     def run(self):
         if(self.server is None):
-            self.server = customServer(self.port) 
+            self.server = customServer(self.port, self.bufferLength) 
             self.connect(self.server, self.server.signal, self.gpsCallback)  
             self.server.start()
 
     def gpsCallback(self, sigStr):
-        #print " ".join(hex(ord(n)) for n in sigStr)
-        strArr = sigStr.split(',')
-        #if(strArr[0] == '$GPGGA'):
-        #    lat, lon = self.getLatLongFromNMEA(strArr)
-        #    print lat
-        #    print lon
+        print "Callback"
         print sigStr
+        strArr = sigStr.split('\n')[1].split(',')
+        if(strArr[0] == '$GPGGA'):
+            lat, lng = self.getLatLongFromNMEA(strArr)
+            self.detectionWindow.handleCallback(lat, lng)
+            print lat
+            print lng
 
     def getLatLongFromNMEA(self, nmeaSen):
         lat = nmeaSen[2]
@@ -39,13 +42,13 @@ class gpsServer(QtCore.QThread):
         mins = float(lat[2:])
         lat = latDir * (hours + mins / 60.0)
 
-        lon = nmeaSen[4]
-        lonDir = 1.0 if nmeaSen[5] == 'E' else -1.0
+        lng = nmeaSen[4]
+        lngDir = 1.0 if nmeaSen[5] == 'E' else -1.0
 
         #Parse longitude to google maps coordinates
-        hours = float(lon[0:3])
-        mins = float(lon[3:])
-        lon = lonDir * (hours + mins / 60.0)
+        hours = float(lng[0:3])
+        mins = float(lng[3:])
+        lng = lngDir * (hours + mins / 60.0)
 
-        return [lat, lon]
+        return [lat, lng]
 

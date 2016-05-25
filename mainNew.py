@@ -25,11 +25,16 @@ import os
 
 roverSocket = None
 port = 9999
-gpsPort = 22336
+gpsPort = 22335
 #roverip = '128.205.55.154' #LocalBackup
 #roverip = '128.205.55.189' #MainRover
 #roverip = '166.166.193.135' #GX440
-roverip = '166.161.234.059' #GX450
+#roverip = '166.161.234.059' #GX450
+#roverip = '172.56.14.130' #New Router
+#roverip = '30.233.152.250'
+#roverip = '172.56.14.215'
+roverip = '172.56.15.176'
+
 MSGLEN = 64
 
 #communication: method for sending data across to rover. This socket is only meant for sending data to the rover 
@@ -45,6 +50,8 @@ def send_data(msg):
             print "Initializing socket"
             roverSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             roverSocket.settimeout(1)
+            print roverip 
+            print port
             roverSocket.connect((roverip, port))
         totalsent = 0
         '''
@@ -95,8 +102,8 @@ class Rover(QtGui.QWidget):
         self.gpsServer = None
         self.startServer()
         self.startXbox()
-        self.startGPS()
         self.detectionWindow = detectionWindow(self)
+        self.startGPS()
         self.camValue = 4
         self.FPS = 15
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
@@ -364,7 +371,7 @@ class Rover(QtGui.QWidget):
 
     def startServer(self):             
         if(self.server==None):  
-            self.server = customServer(port)     
+            self.server = customServer(port, 64)     
             self.connect( self.server,  self.server.signal, self.serverCallBackfunc)    
             self.server.start() 
 
@@ -385,7 +392,7 @@ class Rover(QtGui.QWidget):
     
     def startGPS(self):
         if(self.gpsServer is None):
-            self.gpsServer = gpsServer(gpsPort)
+            self.gpsServer = gpsServer(gpsPort, self.detectionWindow)
             self.gpsServer.start() 
 
 class MyTextEdit(QtGui.QWidget):

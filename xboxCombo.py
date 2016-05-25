@@ -86,7 +86,7 @@ class xbox(QtCore.QThread):
 		    joystick2.init()
 
                     #print(time.time() - globals.now)	    
-                    if time.time() - globals.now < 200:
+                    if time.time() - globals.now < 2:
                         #Wrist Movement
                         if joystick.get_button(5) and math.fabs(joystick.get_axis(4)) > .2:
 		            elbowPosition = 0
@@ -172,8 +172,9 @@ class xbox(QtCore.QThread):
                             self.pos = True
                         #Home Position (Y)
                         elif(joystick.get_button(3)):
+                            self.basePosition = 1450
                             self.elbowPosition = 450
-                            self.shoulderPosition = 300
+                            self.shoulderPosition = 320
                             self.flag = 2
                             self.homeTime = time.time()
                             self.pos = True
@@ -206,7 +207,7 @@ class xbox(QtCore.QThread):
 		        self.emit(self.signal, self.Command)
 		        self.Command = ""
 
-                        dropTime = 10
+                        dropTime = 5
                         homeTime = 5 
 
                         #Drop Position(X)
@@ -221,8 +222,7 @@ class xbox(QtCore.QThread):
                             self.pos = False
                         #Home Position(Y)
                         elif(self.flag == 2 and time.time() - self.homeTime > homeTime):
-                            self.basePosition = 1100
-                            self.manipulatorPosition = 2400
+                            self.manipulatorPosition = 1900
                             self.flag = 0
                             self.pos = True
                         else:
